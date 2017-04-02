@@ -2,6 +2,9 @@
 
 import rospy
 import numpy as np
+from enum import Enum
+
+TypeNode = Enum('Start', 'Goal', 'Wall', 'Fronier')
 
 class Node(object):
 	"""docstring for Node"""
@@ -11,20 +14,32 @@ class Node(object):
 		self.gcost = 0
 		self.hcost = 0
 		self.fcost = 0
+		self.typeOfNode = typeOfNode
 
+
+	#
 	def findF(self, start, end):
-		F = findG(start, end) + findH(start, end)
+		F = findG(start, end) + findH(self, end)
 		self.fcost = F
 		return F
 
+	
 	def findG(self, start, end):
-	def findH(self, start, end):
+		pass
 
+	#Finds the Heuristic Distance
+	def findH(self, goal):
+		H = findManhattan(self, goal)
+		self.h = H
+		return H
+
+	
 	def findManhattan(self, nodeToCheck):
 		Xdif = nodeToCheck.x - self.x
 		yDif = nodeToCheck.y - self.y
 		return Xdif + yDif
 
+	
 	def findDirect(self, nodeToCheck):
 		Xdif = nodeToCheck.x - self.x
 		yDif = nodeToCheck.y - self.y
