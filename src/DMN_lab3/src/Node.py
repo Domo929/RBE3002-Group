@@ -3,8 +3,6 @@
 import numpy as np
 from enum import Enum
 
-#Change to show Mike something
-
 #TODO see if this is actually how Python Enum works
 TypeNode = Enum(Start, Goal, Wall, Frontier, Unknown)
 
