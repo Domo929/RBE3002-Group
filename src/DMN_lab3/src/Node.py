@@ -1,45 +1,43 @@
 #!/usr/bin/env python
 
-import rospy
 import numpy as np
 from enum import Enum
 
-TypeNode = Enum('Start', 'Goal', 'Wall', 'Fronier')
+#TODO see if this is actually how Python Enum works
+TypeNode = Enum(Start, Goal, Wall, Frontier, Unknown)
 
 class Node(object):
-	"""docstring for Node"""
-	def __init__(self, x, y, loc, typeOfNode):
+	
+	def __init__(self, x, y, typeOfNode):
 		self.x = x
 		self.y = y
-		self.gcost = 0
-		self.hcost = 0
-		self.fcost = 0
+		self.gCost = 0
+		self.hCost = 0
+		self.fCost = 0
 		self.typeOfNode = typeOfNode
 
 
-	#
+	#Uses Manhattan for G and Direct for H
 	def findF(self, start, end):
-		F = findG(start, end) + findH(self, end)
-		self.fcost = F
-		return F
+		self.fCost = findG(start, self) + findH(self, end)
+		return  self.fCost
+	#finds the known distance using Manhattan
+	def findG(self, goal):
+		self.gcost = findManhattan(self, goal)
+		return self.gCost
 
-	
-	def findG(self, start, end):
-		pass
-
-	#Finds the Heuristic Distance
+	#Finds the Heuristic Distance using direct
 	def findH(self, goal):
-		H = findManhattan(self, goal)
-		self.h = H
-		return H
+		self.hCost = findDirect(self, goal)
+		return self.hCost
 
-	
+	#determines distance between two nodes using the Manhattan distance
 	def findManhattan(self, nodeToCheck):
-		Xdif = nodeToCheck.x - self.x
-		yDif = nodeToCheck.y - self.y
+		Xdif = np.absolute(nodeToCheck.x - self.x)
+		yDif = np.absolute(nodeToCheck.y - self.y)
 		return Xdif + yDif
 
-	
+	#finds the distance between two nodes using the Direct Distance
 	def findDirect(self, nodeToCheck):
 		Xdif = nodeToCheck.x - self.x
 		yDif = nodeToCheck.y - self.y
