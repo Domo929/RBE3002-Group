@@ -1,1 +1,2 @@
-RBE3002 Group DMN \n Dominic Cupo, Nick Hollan, and Michael Hopkins
+RBE3002 Group DMN
+Dominic Cupo, Nick Hollan, and Michael Hopkins
