@@ -43,7 +43,7 @@ class aStar:
 			while y < 2:
 				if(not(x == 0 and y==0)): # do not check current node
 					nextNode = self.nodes[currentX+x][currentY+y]
-					tempF = nextNode.getF(startNode,endNode)
+					tempF = nextNode.findF(startNode,endNode)
 					if(tempF>maxF and nextNode.type == "Frontier"):
 						maxF=tempF
 						maxPoint.x=x
