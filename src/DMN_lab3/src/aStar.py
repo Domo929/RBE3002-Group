@@ -22,7 +22,7 @@ class aStar:
 		endNode = self.nodes[goal.x][goal.y]
 		currentNode = startNode
 		
-		while(currentNode.x == goal.x and currentNode.y == goal.y):
+		while(not(currentNode.x == goal.x and currentNode.y == goal.y)):
 			currentNode = findBestNode(startNode, endNode, currentNode)
 			path.append(currentNode)
 
