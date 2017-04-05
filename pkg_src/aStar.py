@@ -54,9 +54,3 @@ class aStar:
 		return maxPoint
 
 
-
-
-
-
-
-
