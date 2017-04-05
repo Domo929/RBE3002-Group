@@ -1,13 +1,35 @@
 #!/usr/bin/env python
-import aStar
+
 import rospy
 from nav_msgs.msg import OccupancyGrid
+from geometry_msgs.msg import Point
+from Node import Node
+from aStar import aStar
 
 
 
-def saveMap(data):
-	global mainMap
-	mainMap = data.data
+def saveMap(input):
+	
+    global mainMap
+    width = input.info.width
+    height = input.info.height
+    print(width)
+    print(height)
+    
+    mainMap = [[0 for x in range(width)] for y in range(height)]
+    
+    y=0
+    while(y<height):
+        x=0
+        while(x<width):
+            if(input.data[x*width+y]>50):
+                tempNode = Node(x,y,-1)
+            else:
+                tempNode = Node(x,y,0)
+            mainMap[x][y]=tempNode
+            x+=1
+             
+        y+=1
 
 
 if __name__ == '__main__':
@@ -25,6 +47,5 @@ if __name__ == '__main__':
     end.y=10
     end.z=0
 	
-    aStar = aStar(mainMap)
-    aStar.runAStar(start,end)
-
+    aStarObject = aStar(mainMap)
+    aStarObject.runAStar(start,end)
