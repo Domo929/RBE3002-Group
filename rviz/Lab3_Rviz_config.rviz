@@ -9,9 +9,13 @@ Panels:
         - /Grid1
         - /Turtlebot1/Status1
         - /Map1
+        - /Start1
+        - /Goal1
         - /Frontier1
         - /Explored1
         - /Unexplored1
+        - /ShortestPath1
+        - /Obstacles1
       Splitter Ratio: 0.5
     Tree Height: 1259
   - Class: rviz/Selection
@@ -80,46 +84,10 @@ Visualization Manager:
       Unreliable: false
       Value: true
     - Alpha: 1
-      Class: rviz/GridCells
-      Color: 0; 0; 127
-      Enabled: true
-      Name: Frontier
-      Topic: ""
-      Value: true
-    - Alpha: 1
-      Class: rviz/GridCells
-      Color: 255; 255; 127
-      Enabled: true
-      Name: Explored
-      Topic: ""
-      Value: true
-    - Alpha: 1
-      Class: rviz/GridCells
-      Color: 170; 255; 255
-      Enabled: true
-      Name: Unexplored
-      Topic: ""
-      Value: true
-    - Alpha: 1
-      Class: rviz/GridCells
-      Color: 25; 255; 0
-      Enabled: true
-      Name: ShortestPath
-      Topic: ""
-      Value: true
-    - Class: rviz/MarkerArray
-      Enabled: true
-      Marker Topic: waypoint_marker_array
-      Name: Waypoints
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: true
-    - Alpha: 1
       Axes Length: 1
       Axes Radius: 0.1
       Class: rviz/Pose
-      Color: 255; 25; 0
+      Color: 0; 255; 0
       Enabled: true
       Head Length: 0.3
       Head Radius: 0.1
@@ -134,7 +102,7 @@ Visualization Manager:
       Axes Length: 1
       Axes Radius: 0.1
       Class: rviz/Pose
-      Color: 255; 25; 0
+      Color: 0; 0; 255
       Enabled: true
       Head Length: 0.3
       Head Radius: 0.1
@@ -144,6 +112,49 @@ Visualization Manager:
       Shape: Arrow
       Topic: /goalpose
       Unreliable: false
+      Value: true
+    - Alpha: 1
+      Class: rviz/GridCells
+      Color: 0; 0; 127
+      Enabled: true
+      Name: Frontier
+      Topic: /mapData/Frontier
+      Value: true
+    - Alpha: 1
+      Class: rviz/GridCells
+      Color: 255; 255; 127
+      Enabled: true
+      Name: Explored
+      Topic: /mapData/Explored
+      Value: true
+    - Alpha: 1
+      Class: rviz/GridCells
+      Color: 170; 255; 255
+      Enabled: true
+      Name: Unexplored
+      Topic: /mapData/Unexplored
+      Value: true
+    - Alpha: 1
+      Class: rviz/GridCells
+      Color: 25; 255; 0
+      Enabled: true
+      Name: ShortestPath
+      Topic: /mapData/ShortestPath
+      Value: true
+    - Alpha: 1
+      Class: rviz/GridCells
+      Color: 25; 255; 0
+      Enabled: true
+      Name: Obstacles
+      Topic: /mapData/Obstacles
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: waypoint_marker_array
+      Name: Waypoints
+      Namespaces:
+        {}
+      Queue Size: 100
       Value: true
   Enabled: true
   Global Options:
