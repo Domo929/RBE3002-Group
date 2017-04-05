@@ -4,7 +4,7 @@ import numpy as np
 from enum import Enum
 
 #TODO see if this is actually how Python Enum works
-TypeNode = Enum(Start, Goal, Wall, Frontier, Unknown)
+#TypeNode = Enum('Start', 'Goal', 'Wall', 'Frontier', 'Unknown')
 
 class Node(object):
 	
