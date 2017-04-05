@@ -1,7 +1,0 @@
-/home/rbe/Documents/RBE3002-Group/build/CMakeFiles/clean_test_results.dir
-/home/rbe/Documents/RBE3002-Group/build/CMakeFiles/download_extra_data.dir
-/home/rbe/Documents/RBE3002-Group/build/CMakeFiles/doxygen.dir
-/home/rbe/Documents/RBE3002-Group/build/gtest/CMakeFiles/gtest.dir
-/home/rbe/Documents/RBE3002-Group/build/gtest/CMakeFiles/gtest_main.dir
-/home/rbe/Documents/RBE3002-Group/build/CMakeFiles/run_tests.dir
-/home/rbe/Documents/RBE3002-Group/build/CMakeFiles/tests.dir
