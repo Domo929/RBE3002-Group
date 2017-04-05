@@ -13,13 +13,14 @@ Unexplored = 6
 
 class Node(object):
 	
-	def __init__(self, x, y, typeOfNode):
+	def __init__(self, parent, x, y):
+		self.parent = parent
 		self.x = x
 		self.y = y
 		self.gCost = 0
 		self.hCost = 0
 		self.fCost = 0
-		self.typeOfNode = typeOfNode
+		
 
 
 	#Uses Manhattan for G and Direct for H
