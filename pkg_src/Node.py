@@ -2,11 +2,17 @@
 
 import numpy as np
 
+# -1 Obstacle
+# 0 Unexplored
+# 1 Explored
+# 2 Fronteir
+
 class Node(object):
 	
-	def __init__(self, x, y):
+	def __init__(self, x, y, state):
 		self.x = x
 		self.y = y
+		self.state = state
 		self.gCost = 0
 		self.hCost = 0
 		self.fCost = 0
