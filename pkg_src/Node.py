@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
 import numpy as np
-from enum import Enum
 
-#TODO see if this is actually how Python Enum works
-#TypeNode = Enum('Start', 'Goal', 'Wall', 'Frontier', 'Unknown')
+"""
+Start = 1
+Goal = 2
+Wall = 3
+Frontier = 4
+Explored = 5
+Unexplored = 6
+"""
 
 class Node(object):
 	
