@@ -13,8 +13,8 @@ def saveMap(input):
     global mainMap
     width = input.info.width
     height = input.info.height
-    print(width)
-    print(height)
+    #print(width)
+    #print(height)
     
     mainMap = [[0 for x in range(width)] for y in range(height)]
     
