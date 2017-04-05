@@ -4,6 +4,7 @@ import rospy, tf, math
 # Add additional imports for each of the message types use
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import GridCells
+import Node
 
 class aStar:
 	pubFrontier = rospy.Publisher('/mapData/Frontier', GridCells,queue_size=10)
@@ -48,8 +49,8 @@ class aStar:
 						maxF=tempF
 						maxPoint.x=x
 						maxPoint.y=y
-				y++
-			x++
+				y = y + 1
+			x = x + 1
 		return maxPoint
 
 
