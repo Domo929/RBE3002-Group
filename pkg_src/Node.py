@@ -5,7 +5,7 @@ import numpy as np
 # -1 Obstacle
 # 0 Unexplored
 # 1 Explored
-# 2 Fronteir
+# 2 Frontier
 
 class Node(object):
 	
@@ -20,7 +20,7 @@ class Node(object):
 
 	#Uses Manhattan for G and Direct for H
 	def findF(self, start, end):
-		self.fCost = self.findG(start) + self.findH(end)
+		self.fCost = self.gCost + self.findH(end)
 		return  self.fCost
 
 	#finds the known distance using Manhattan
