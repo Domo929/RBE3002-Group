@@ -19,11 +19,14 @@ class aStar:
 		self.unknown = []
 
 	def aStar(self, start, goal):
+
 	    #The open and closed sets
 	    openset = set()
 	    closedset = set()
+
 	    #Current point is the starting point
 	    current = start
+	    current.gCost = 0
 	    #Add the starting point to the open set
 	    openset.add(current)
 	    #While the open set is not empty
@@ -43,26 +46,29 @@ class aStar:
 	        openset.remove(current)
 	        #Add it to the closed set
 	        closedset.add(current)
+	        kids = self.findChildren(current)
 	        #Loop through the node's children/siblings
-	        for node in self.findChildren(current):
+	        for node in kids:
 	            #If it is already in the closed set, skip it
-	            if node in closedset:
+	            if node in closedset or node.state == -1:
 	                continue
 	            #Otherwise if it is already in the open set
 	            if node in openset:
-	                #Check if we beat the G score 
-	                new_g = current.findG(goal)
-	                if node.gCost > new_g:
+	                #Check if we beat the F score 
+	                new_f = current.findF(start, goal)
+	                if node.fCost > new_f:
 	                    #If so, update the node to have a new parent
-	                    node.gCost = new_g
+	                    node.fCost = new_f
 	                    node.parent = current
 	            else:
+	            	node.gCost = current.gCost + 1
 	                #If it isn't in the open set, calculate the G and H score for the node
 	                node.findF(start,goal)
 	                #Set the parent to our current item
 	                node.parent = current
 	                #Add it to the set
 	                openset.add(node)
+	        
 	    #Throw an exception if there is no path
 	    raise ValueError('No Path Found')
 
