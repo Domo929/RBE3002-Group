@@ -55,16 +55,12 @@ if __name__ == '__main__':
     pathReturned = aStarObject.aStar(start,end)
     pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
     pubWaypoint = rospy.Publisher('/waypoint',Path,queue_size=10)
-    #print(pathReturned)
     pubPathInfo = GridCells()
     pubPathInfo.header.frame_id = "map"
     pubPathInfo.cell_width =1
     pubPathInfo.cell_height=1
     pubPathInfo.cells = pathReturned
-    #print(pathReturned)
     lastPose = pathReturned[0]
-    #print "pathReturned 0"
-    #print pathReturned[0]
     poses2 = []
     for point in pathReturned:
         pose = lastPose
@@ -81,7 +77,6 @@ if __name__ == '__main__':
         tempPose.pose.orientation.y = quaternion[1]
         tempPose.pose.orientation.z = quaternion[2]
         tempPose.pose.orientation.w = quaternion[3]
-        #tempPose.pose.orientation = quaternion
         poses2.append(tempPose)
         lastPose = point
 
