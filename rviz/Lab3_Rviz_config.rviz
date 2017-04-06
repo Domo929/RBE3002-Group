@@ -9,14 +9,12 @@ Panels:
         - /Grid1
         - /Turtlebot1/Status1
         - /Map1
-        - /Start1
-        - /Goal1
-        - /Frontier1
-        - /Explored1
+        - /Map1/Position1
         - /Unexplored1
-        - /ShortestPath1
+        - /Unexplored1/Status1
         - /Obstacles1
-      Splitter Ratio: 0.5
+        - /Obstacles1/Status1
+      Splitter Ratio: 0.541872
     Tree Height: 1259
   - Class: rviz/Selection
     Name: Selection
@@ -129,11 +127,11 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Class: rviz/GridCells
-      Color: 170; 255; 255
-      Enabled: true
+      Color: 255; 255; 127
+      Enabled: false
       Name: Unexplored
       Topic: /mapData/Unexplored
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/GridCells
       Color: 25; 255; 0
@@ -143,11 +141,11 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Class: rviz/GridCells
-      Color: 25; 255; 0
-      Enabled: true
+      Color: 85; 0; 255
+      Enabled: false
       Name: Obstacles
-      Topic: /mapData/Obstacles
-      Value: true
+      Topic: mapData/Obstacles
+      Value: false
     - Class: rviz/MarkerArray
       Enabled: true
       Marker Topic: waypoint_marker_array
@@ -180,22 +178,22 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 36.8726
+      Distance: 4.563
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.407433
+        Y: 0.531745
+        Z: 0.254208
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.824797
+      Pitch: 1.5698
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.340398
+      Yaw: 0.0354002
     Saved: ~
 Window Geometry:
   Displays:
@@ -213,5 +211,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 2044
-  X: 328
-  Y: 74
+  X: 337
+  Y: 95
