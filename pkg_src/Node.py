@@ -9,7 +9,8 @@ import numpy as np
 
 class Node(object):
 	
-	def __init__(self, x, y, state):
+	def __init__(self, parent, x, y, state):
+		self.parent = parent
 		self.x = x
 		self.y = y
 		self.state = state
@@ -47,6 +48,8 @@ class Node(object):
 		yDif = nodeToCheck.y - self.y
 		val = np.sqrt(Xdif**2 + yDif**2)
 		return val
+
+	
 
 		
 		
