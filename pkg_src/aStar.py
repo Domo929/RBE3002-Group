@@ -4,7 +4,7 @@ import rospy, tf, math
 # Add additional imports for each of the message types use
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import GridCells
-import Node
+from Node import Node
 from geometry_msgs.msg import Point
 
 class aStar:
@@ -34,7 +34,7 @@ class aStar:
 				if(not(x == 0 and y==0)): # do not check current node
 					nextNode = self.nodes[currentX+x][currentY+y]
 					tempF = nextNode.findF(startNode,endNode)
-					if(tempF>maxF and nextNode.type == "Frontier"):
+					if(tempF>maxF and nextNode.state == "Frontier"):
 						maxF=tempF
 						maxPoint.x=x
 						maxPoint.y=y
