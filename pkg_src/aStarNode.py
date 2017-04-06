@@ -62,23 +62,33 @@ if __name__ == '__main__':
     pubPathInfo.cells = pathReturned
     lastPose = pathReturned[0]
     poses2 = []
-    for point in pathReturned:
-        pose = lastPose
-        goalPose = point
+    for x in range(1, len(pathReturned)-1):
+    # for point in pathReturned:
+        current = pathReturned[x]
+        next = pathReturned[x+1]
+        previous = pathReturned[x-1]
 
-        angleToNextPoint = math.atan2(goalPose.y-pose.y,(goalPose.x-pose.x))
 
-        quaternion = tf.transformations.quaternion_from_euler(0,0,angleToNextPoint)
-        tempPose = PoseStamped()
-        tempPose.header.frame_id = 'map'
-        tempPose.pose.position.x=pose.x
-        tempPose.pose.position.y=pose.y
-        tempPose.pose.orientation.x = quaternion[0]
-        tempPose.pose.orientation.y = quaternion[1]
-        tempPose.pose.orientation.z = quaternion[2]
-        tempPose.pose.orientation.w = quaternion[3]
-        poses2.append(tempPose)
-        lastPose = point
+        angleToNextPoint = math.atan2(next.y-current.y,(next.x-current.x))
+        prevToCurrentAngle = math.atan2(current.y-previous.y,(current.x-previous.x))
+
+        if(prevToCurrentAngle!=angleToNextPoint):
+            quaternion = tf.transformations.quaternion_from_euler(0,0,angleToNextPoint)
+            tempPose = PoseStamped()
+            tempPose.header.frame_id = 'map'
+            tempPose.pose.position.x=current.x
+            tempPose.pose.position.y=current.y
+            tempPose.pose.orientation.x = quaternion[0]
+            tempPose.pose.orientation.y = quaternion[1]
+            tempPose.pose.orientation.z = quaternion[2]
+            tempPose.pose.orientation.w = quaternion[3]
+            poses2.append(tempPose)
+
+    tempPose = PoseStamped()
+    tempPose.header.frame_id = 'map'
+    tempPose.pose.position.x=pathReturned[len(pathReturned)-1].x
+    tempPose.pose.position.y=pathReturned[len(pathReturned)-1].y
+    poses2.append(tempPose)
 
     waypointsToPublish = Path()
     waypointsToPublish.header.frame_id = 'map'
