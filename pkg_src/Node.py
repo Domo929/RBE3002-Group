@@ -2,31 +2,26 @@
 
 import numpy as np
 
-"""
-Start = 1
-Goal = 2
-Wall = 3
-Frontier = 4
-Explored = 5
-Unexplored = 6
-"""
+# -1 Obstacle
+# 0 Unexplored
+# 1 Explored
+# 2 Fronteir
 
 class Node(object):
 	
-	def __init__(self, parent, x, y):
-		self.parent = parent
+	def __init__(self, x, y, state):
 		self.x = x
 		self.y = y
+		self.state = state
 		self.gCost = 0
 		self.hCost = 0
 		self.fCost = 0
-		
-
 
 	#Uses Manhattan for G and Direct for H
 	def findF(self, start, end):
 		self.fCost = findG(start, self) + findH(self, end)
 		return  self.fCost
+
 	#finds the known distance using Manhattan
 	def findG(self, goal):
 		self.gcost = findManhattan(self, goal)

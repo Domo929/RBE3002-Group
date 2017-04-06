@@ -5,6 +5,7 @@ import rospy, tf, math
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import GridCells
 import Node
+from geometry_msgs.msg import Point
 
 class aStar:
 	pubFrontier = rospy.Publisher('/mapData/Frontier', GridCells,queue_size=10)
@@ -17,19 +18,7 @@ class aStar:
 		self.frontier = []
 		self.unknown = []
 
-	#start and goal are both point objects
-	def runAStar(start,goal):
-		startNode = self.nodes[start.x][start.y]
-		endNode = self.nodes[goal.x][goal.y]
-		currentNode = startNode
-		
-		while(not(currentNode.x == goal.x and currentNode.y == goal.y)):
-			currentNode = findBestNode(startNode, endNode, currentNode)
-			path.append(currentNode)
-
-
-
-	def findBestNode(startNode,endNode,currentNode):
+	def findBestNode(self,startNode,endNode,currentNode):
 		maxF = 0
 		currentX=currentNode.x
 		currentY=currentNode.y
@@ -52,5 +41,17 @@ class aStar:
 				y = y + 1
 			x = x + 1
 		return maxPoint
+
+
+	#start and goal are both point objects
+	def runAStar(self,start,goal):
+
+		startNode = self.nodes[int(start.x)][int(start.y)]
+		endNode = self.nodes[int(goal.x)][int(goal.y)]
+		currentNode = startNode
+		
+		while(not(currentNode.x == goal.x and currentNode.y == goal.y)):
+			currentNode = self.findBestNode(startNode, endNode, currentNode)
+			self.path.append(currentNode)
 
 
