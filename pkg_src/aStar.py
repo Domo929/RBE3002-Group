@@ -68,6 +68,7 @@ class aStar:
 	                node.parent = current
 	                #Add it to the set
 	                openset.add(node)
+	        
 	    #Throw an exception if there is no path
 	    raise ValueError('No Path Found')
 

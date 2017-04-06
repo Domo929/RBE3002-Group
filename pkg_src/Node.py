@@ -31,7 +31,7 @@ class Node(object):
 
 	#Finds the Heuristic Distance using direct
 	def findH(self, end):
-		self.hCost = self.findDirect(end)
+		self.hCost = self.findManhattan(end)
 		print("hCost",self.hCost)
 		return self.hCost
 
