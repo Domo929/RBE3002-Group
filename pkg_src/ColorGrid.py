@@ -9,41 +9,14 @@ def findGrid(msg):
 	global width
 	global height
 	global index
-	global obstacle_pub
-	global unexplored_pub
+	global resolution
 
 	print "I Got A Message"
 
 	width = msg.info.width
 	height = msg.info.height
+	resolution = msg.info.resolution
 	index = msg.data
-
-	# lstOb = []
-	# lstUn = []
-	# for x in range(0, width):
-	# 	for y in range(0, height):
-	# 		val = index[x*width+y]
-	# 		#print val
-	# 		if val == 100:
-	# 			lstOb.append(Point(x,y,0))
-	# 		elif val == 0:
-	# 			lstUn.append(Point(x,y,0))
-
-	# ObGridCell = GridCells()
-	# #ObGridCell.header.frame_id = 'map'
-	# ObGridCell.cell_width = 0.3
-	# ObGridCell.cell_height - 0.3
-	# ObGridCell.cells.append(lstOb)
-
-	# UnGridCell = GridCells()
-	# #UnGridCell.header.frame_id = 'map'
-	# UnGridCell.cell_width = 0.3
-	# UnGridCell.cell_height = 0.3
-	# UnGridCell.cells.append(lstUn)
-	# while(1==1):
-
-	# 	obstacle_pub.publish(ObGridCell)
-	# 	unexplored_pub.publish(UnGridCell)
 
 
 
@@ -54,6 +27,7 @@ if __name__ == "__main__":
 	global index
 	global width 
 	global height
+	global resolution
 	global obstacle_pub
 	global unexplored_pub
 	rospy.init_node('ColorGrid')
@@ -82,6 +56,13 @@ if __name__ == "__main__":
 	else:
 		index = index
 
+	try:
+		resolution
+	except NameError:
+		resolution = 1
+	else:
+		resolution = resolution
+
 	print "begin"
 	while not rospy.is_shutdown():
 	
@@ -92,25 +73,21 @@ if __name__ == "__main__":
 				val = index[y*width+x]
 				#print val
 				if val == 100:
-					lstOb.append(Point(x,y,0))
+					lstOb.append(Point(resolution*x,resolution*y,0))
 				elif val == 0:
-					lstUn.append(Point(x,y,0))
+					lstUn.append(Point(resolution*x,resolution*y,0))
 
 		ObGridCell = GridCells()
 		ObGridCell.header.frame_id = 'map'
-		ObGridCell.cell_width = 0.3
-		ObGridCell.cell_height = 0.3
+		ObGridCell.cell_width = resolution
+		ObGridCell.cell_height = resolution
 		ObGridCell.cells = lstOb
-		#ObGridCell.cells.append(Point(2,3,0))
-		#ObGridCell.cells.append(Point(4,5,0))
 
 		UnGridCell = GridCells()
 		UnGridCell.header.frame_id = 'map'
-		UnGridCell.cell_width = 0.3
-		UnGridCell.cell_height = 0.3
+		UnGridCell.cell_width = resolution
+		UnGridCell.cell_height = resolution
 		UnGridCell.cells = lstUn
-		#UnGridCell.cells.append(Point(4,6,0))
-		#UnGridCell.cells.append(Point(1,7,0))
 
 		obstacle_pub.publish(ObGridCell)
 		unexplored_pub.publish(UnGridCell)
