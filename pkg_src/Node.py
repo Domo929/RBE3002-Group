@@ -9,8 +9,7 @@ import numpy as np
 
 class Node(object):
 	
-	def __init__(self, parent, x, y, state):
-		self.parent = parent
+	def __init__(self, x, y, state):
 		self.x = x
 		self.y = y
 		self.state = state
