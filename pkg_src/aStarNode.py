@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-import rospy
+import rospy, tf
 from nav_msgs.msg import OccupancyGrid
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, PoseStamped
 from Node import Node
 from aStar import aStar
-from nav_msgs.msg import GridCells
+from nav_msgs.msg import GridCells, Path
+import math
 
 
 def saveMap(input):
@@ -53,10 +54,42 @@ if __name__ == '__main__':
     print("After astar")
     pathReturned = aStarObject.aStar(start,end)
     pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
-    print(pathReturned)
+    pubWaypoint = rospy.Publisher('/waypoint',Path,queue_size=10)
+    #print(pathReturned)
     pubPathInfo = GridCells()
     pubPathInfo.header.frame_id = "map"
     pubPathInfo.cell_width =1
     pubPathInfo.cell_height=1
     pubPathInfo.cells = pathReturned
-    pubPath.publish(pubPathInfo)
+    #print(pathReturned)
+    lastPose = pathReturned[0]
+    #print "pathReturned 0"
+    #print pathReturned[0]
+    poses2 = []
+    for point in pathReturned:
+        pose = lastPose
+        goalPose = point
+
+        angleToNextPoint = math.atan2(goalPose.y-pose.y,(goalPose.x-pose.x))
+
+        quaternion = tf.transformations.quaternion_from_euler(0,0,angleToNextPoint)
+        tempPose = PoseStamped()
+        tempPose.header.frame_id = 'map'
+        tempPose.pose.position.x=pose.x
+        tempPose.pose.position.y=pose.y
+        tempPose.pose.orientation.x = quaternion[0]
+        tempPose.pose.orientation.y = quaternion[1]
+        tempPose.pose.orientation.z = quaternion[2]
+        tempPose.pose.orientation.w = quaternion[3]
+        #tempPose.pose.orientation = quaternion
+        poses2.append(tempPose)
+        lastPose = point
+
+    waypointsToPublish = Path()
+    waypointsToPublish.header.frame_id = 'map'
+    waypointsToPublish.poses = poses2
+    while not rospy.is_shutdown():
+        pubWaypoint.publish(waypointsToPublish)
+        pubPath.publish(pubPathInfo)
+        rospy.sleep(rospy.Duration(1))
+

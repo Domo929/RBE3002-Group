@@ -26,13 +26,13 @@ class Node(object):
 	#finds the known distance using Manhattan
 	def findG(self, start):
 		self.gCost = self.findManhattan(start)
-		print("gCost",self.gCost)
+		#print("gCost",self.gCost)
 		return self.gCost
 
 	#Finds the Heuristic Distance using direct
 	def findH(self, end):
 		self.hCost = self.findManhattan(end)
-		print("hCost",self.hCost)
+		#print("hCost",self.hCost)
 		return self.hCost
 
 	#determines distance between two nodes using the Manhattan distance
