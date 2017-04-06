@@ -40,15 +40,14 @@ class aStar:
 	                path.append(current)
 	                current = current.parent
 	            path.append(current)
-	            print(path[::-1])
+	            #print(path[::-1])
 	            return self.toPublishable(path[::-1])
 	        #Remove the item from the open set
 	        openset.remove(current)
 	        #Add it to the closed set
 	        closedset.add(current)
-	        kids = self.findChildren(current)
 	        #Loop through the node's children/siblings
-	        for node in kids:
+	        for node in self.findChildren(current):
 	            #If it is already in the closed set, skip it
 	            if node in closedset or node.state == -1:
 	                continue
