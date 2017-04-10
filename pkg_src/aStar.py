@@ -64,15 +64,10 @@ class aStar:
 		currentY=currentNode.y
 		listOfNodes = []
 
-		x = -1
-		y = -1
-		while x < 2:
-			y=-1
-			while y < 2:
-				if(not(x == 0 and y==0)):
-					listOfNodes.append(self.nodes[currentX+x][currentY+y])
-				y = y + 1
-			x = x + 1
+		for x in range(-1,2):
+			for y in range(-1,2):
+				if(not(x == 0 and y == 0)):
+					listOfNodes.append(self.nodes[currentX + x][currentY + y])
 
 		return listOfNodes
 
@@ -94,7 +89,7 @@ class aStar:
 			pubPathInfo.cells = self.path
 			self.pubPath.publish(pubPathInfo)
 		print("Before while pub")
-		while(1==1):
+		while(True):
 			pubPath.publish(pubPathInfo)
 
 
