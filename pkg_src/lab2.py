@@ -196,6 +196,6 @@ if __name__ == '__main__':
     # Use this command to make the program wait for some seconds
     rospy.sleep(rospy.Duration(1, 0))
     print "Starting Lab 2"
-    rospy.sleep(rospy.Duration(1000))
-    print "Lab 2 complete!"
+    while not rospy.is_shutdown():
+    	rospy.sleep(rospy.Duration(1))
 
