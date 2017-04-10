@@ -1,24 +1,18 @@
 #!/usr/bin/env python
-
 import rospy, tf, math, time
-# Add additional imports for each of the message types use
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import GridCells
 from Node import Node
 from geometry_msgs.msg import Point
 
 class aStar:
-	pubFrontier = rospy.Publisher('/mapData/Frontier', GridCells,queue_size=10)
 	pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
-	pubUnknown = rospy.Publisher('/mapData/Unexplored',GridCells,queue_size=10)
 
 	def __init__(self, nodeList):
 		self.nodes = nodeList
 		self.path = []
-		self.frontier = []
-		self.unknown = []
 
-	def aStar(self, start, goal):
+	def aStarPathFinding(self, start, goal):
 	    openset = set()
 	    closedset = set()
 	    current = start
@@ -70,26 +64,3 @@ class aStar:
 					listOfNodes.append(self.nodes[currentX + x][currentY + y])
 
 		return listOfNodes
-
-	def runAStar(self,start,goal):
-		startNode = self.nodes[int(start.x)][int(start.y)]
-		endNode = self.nodes[int(goal.x)][int(goal.y)]
-		currentNode = startNode
-		print("before while")
-		while(not(currentNode.x == goal.x and currentNode.y == goal.y)):
-			currentNode = self.findBestNode(startNode, endNode, currentNode)
-			self.path.append(currentNode)
-			print("changeState")
-			print(currentNode.x)
-			print(currentNode.y)
-			pubPathInfo = GridCells()
-			pubPathInfo.header.frame_id = "map"
-			pubPathInfo.cell_width =1
-			pubPathInfo.cell_height=1
-			pubPathInfo.cells = self.path
-			self.pubPath.publish(pubPathInfo)
-		print("Before while pub")
-		while(True):
-			pubPath.publish(pubPathInfo)
-
-
