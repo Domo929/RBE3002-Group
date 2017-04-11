@@ -75,13 +75,24 @@ class aStar:
 
 
 	def findChildrenRadius(self, currentNode, radius):
+		width = len(self.nodes)
+		height = len(self.nodes[0])
 		currentX=currentNode.x
 		currentY=currentNode.y
 		listOfNodes = []
+		searchX=0
+		searchY=0
 
 		for x in range(-radius, radius + 1):
 			for y in range(-radius , radius + 1):
-				if(not(x == 0 and y == 0)):
-					listOfNodes.append(self.nodes[currentX + x][currentY + y])
+				searchX=currentX+x
+				searchY=currentY+y
+				notSelf=not(x==0) and not(y==0)
+				notLargerThanGrid=not(searchX>=width) and not(searchY>=height)
+				notLessThanGrid=not(searchX<0) and not(searchY<0)
+
+				if(notSelf and notLargerThanGrid and notLessThanGrid):
+					print(searchX,searchY)
+					listOfNodes.append(self.nodes[searchX][searchY])
 
 		return listOfNodes
