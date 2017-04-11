@@ -64,3 +64,24 @@ class aStar:
 					listOfNodes.append(self.nodes[currentX + x][currentY + y])
 
 		return listOfNodes
+
+	def addBuffer(self, radius):
+		for x in self.nodeList:
+			for node in x:
+				if(node.state == -1): # if the node is a wall
+					for child in findChildren(node,radius):
+						child.type = -1
+		return self.nodeList
+
+
+	def findChildren(self, currentNode, radius):
+        currentX=currentNode.x
+        currentY=currentNode.y
+        listOfNodes = []
+
+        for x in range(-radius, radius + 1):
+            for y in range(-radius , radius + 1):
+                if(not(x == 0 and y == 0)):
+                    listOfNodes.append(self.nodes[currentX + x][currentY + y])
+
+        return listOfNodes
