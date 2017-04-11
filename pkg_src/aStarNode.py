@@ -37,6 +37,7 @@ if __name__ == '__main__':
     start = mainMap[1][1]
     end = mainMap[10][10]
 
+    aStar(mainMap).addBuffer(1)
     pathReturned = aStar(mainMap).aStarPathFinding(start,end)
     
     pubPathInfo = GridCells()

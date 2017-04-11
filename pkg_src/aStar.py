@@ -66,22 +66,22 @@ class aStar:
 		return listOfNodes
 
 	def addBuffer(self, radius):
-		for x in self.nodeList:
+		for x in self.nodes:
 			for node in x:
 				if(node.state == -1): # if the node is a wall
-					for child in findChildren(node,radius):
+					for child in self.findChildrenRadius(node,radius):
 						child.type = -1
-		return self.nodeList
+		return self.nodes
 
 
-	def findChildren(self, currentNode, radius):
-        currentX=currentNode.x
-        currentY=currentNode.y
-        listOfNodes = []
+	def findChildrenRadius(self, currentNode, radius):
+		currentX=currentNode.x
+		currentY=currentNode.y
+		listOfNodes = []
 
-        for x in range(-radius, radius + 1):
-            for y in range(-radius , radius + 1):
-                if(not(x == 0 and y == 0)):
-                    listOfNodes.append(self.nodes[currentX + x][currentY + y])
+		for x in range(-radius, radius + 1):
+			for y in range(-radius , radius + 1):
+				if(not(x == 0 and y == 0)):
+					listOfNodes.append(self.nodes[currentX + x][currentY + y])
 
-        return listOfNodes
+		return listOfNodes
