@@ -13,6 +13,8 @@ class aStar:
 		self.path = []
 
 	def aStarPathFinding(self, start, goal):
+		if(start.state==-1):
+			raise ValueError('Starting in a wall')
 		openset = set()
 		closedset = set()
 		current = start
@@ -73,7 +75,6 @@ class aStar:
 			for node in x:
 				if(node.state == -1): # if the node is a wall
 					for child in self.findChildrenRadius(node,radius):
-						#child.state = -1
 						if(child.state != -1):
 							addedNodes.append(child)
 		print("Buffer was set")
@@ -81,13 +82,7 @@ class aStar:
 		for node in addedNodes:
 			node.state=-1
 
-		pubPathInfo = GridCells()
-		pubPathInfo.header.frame_id = "map"
-		pubPathInfo.cell_width =1
-		pubPathInfo.cell_height=1
-		pubPathInfo.cells = self.toPublishable(addedNodes)
-		self.pubBuffer.publish(pubPathInfo)
-		return self.nodes
+		return self.toPublishable(addedNodes)
 
 
 	def findChildrenRadius(self, currentNode, radius):

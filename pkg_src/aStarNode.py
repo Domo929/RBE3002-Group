@@ -12,8 +12,10 @@ import math
 
 def saveMap(input):
     global mainMap
+    global resolution
     width = input.info.width
     height = input.info.height
+    resolution = input.info.resolution
     
     mainMap = [[0 for x in range(width)] for y in range(height)]
     
@@ -26,25 +28,46 @@ def saveMap(input):
             mainMap[x][y]=tempNode
 
 if __name__ == '__main__':
-    global mainMap 
+    global mainMap
+    global resolution
+    resolution = 0
     mainMap = []
     subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=10)
     pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
     pubWaypoint = rospy.Publisher('/waypoint',Path,queue_size=10)
+    pubBuffer = rospy.Publisher('/mapData/Buffer',GridCells,queue_size=10)
     initDrivingCode()
+    rospy.sleep(rospy.Duration(1))
 
     rospy.init_node('aStar')
 
     start = mainMap[2][2]
     end = mainMap[10][10]
 
-    aStar(mainMap).addBuffer(1)
+    pubBuf = GridCells()
+    pubBuf.header.frame_id = "map"
+    pubBuf.cell_width =resolution
+    pubBuf.cell_height=resolution
+
+    temp=aStar(mainMap).addBuffer(1) #Adds Buffer
+    for i in range(0, len(temp)):
+        temp[i].x=temp[i].x*resolution + 0.6
+        temp[i].y=temp[i].y*resolution + 0.2
+    pubBuf.cells = temp
+
+
+    
     pathReturned = aStar(mainMap).aStarPathFinding(start,end)
+
+    for i in range(0, len(pathReturned)):
+        pathReturned[i].x=pathReturned[i].x*resolution + 0.6
+        pathReturned[i].y=pathReturned[i].y*resolution + 0.2
+
     
     pubPathInfo = GridCells()
     pubPathInfo.header.frame_id = "map"
-    pubPathInfo.cell_width =1
-    pubPathInfo.cell_height=1
+    pubPathInfo.cell_width = resolution
+    pubPathInfo.cell_height= resolution
     pubPathInfo.cells = pathReturned
     
     lastPose = pathReturned[0]
@@ -79,7 +102,9 @@ if __name__ == '__main__':
     tempPose.pose.position.y=pathReturned[len(pathReturned)-1].y
     listOfWaypoints.append(tempPose)
 
-    for waypoint in listOfWaypoints:
+
+    holder = reversed(listOfWaypoints)
+    for waypoint in holder:
         navToPose(waypoint)
 
     waypointsToPublish = Path()
@@ -88,6 +113,7 @@ if __name__ == '__main__':
     
     print("Before Here")
     while not rospy.is_shutdown():
+        pubBuffer.publish(pubBuf)
         pubWaypoint.publish(waypointsToPublish)
         pubPath.publish(pubPathInfo)
         rospy.sleep(rospy.Duration(1))
