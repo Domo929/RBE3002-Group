@@ -86,9 +86,7 @@ class aStar:
 		pubPathInfo.cell_width =1
 		pubPathInfo.cell_height=1
 		pubPathInfo.cells = self.toPublishable(addedNodes)
-		while(1==1):
-			self.pubBuffer.publish(pubPathInfo)
-		#print(pubPath)
+		self.pubBuffer.publish(pubPathInfo)
 		return self.nodes
 
 
@@ -105,7 +103,7 @@ class aStar:
 			for y in range(-radius , radius + 1):
 				searchX=currentX+x
 				searchY=currentY+y
-				notSelf=not(x==0) and not(y==0)
+				notSelf=not(x==0 and y==0)
 				notLargerThanGrid=not(searchX>=width) and not(searchY>=height)
 				notLessThanGrid=not(searchX<0) and not(searchY<0)
 

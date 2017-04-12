@@ -33,8 +33,8 @@ if __name__ == '__main__':
 
     rospy.init_node('aStar')
 
-    start = mainMap[3][3]
-    end = mainMap[3][4]
+    start = mainMap[2][2]
+    end = mainMap[10][10]
 
     aStar(mainMap).addBuffer(1)
     pathReturned = aStar(mainMap).aStarPathFinding(start,end)
