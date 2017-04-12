@@ -12,37 +12,40 @@ class aStar:
 		self.nodes = nodeList
 		self.path = []
 
-	def aStarPathFinding(self, start, goal):
-	    openset = set()
-	    closedset = set()
-	    current = start
-	    current.gCost = 0
-	    openset.add(current)
-	    while openset:
-	        current = min(openset, key=lambda o:o.findF(start,goal))
-	        if current.x == goal.x and current.y == goal.y:
-	            path = []
-	            while current.parent:
-	                path.append(current)
-	                current = current.parent
-	            path.append(current)
-	            return self.toPublishable(path[::-1])
-	        openset.remove(current)
-	        closedset.add(current)
-	        for node in self.findChildren(current):
-	            if node in closedset or node.state == -1:
-	                continue
-	            if node in openset: 
-	                new_f = current.findF(start, goal)
-	                if node.fCost > new_f:
-	                    node.fCost = new_f
-	                    node.parent = current
-	            else:
-	            	current.gCost = node.gCost + 1
-	                node.findF(start,goal)
-	                node.parent = current
-	                openset.add(node)
-	    raise ValueError('No Path Found')
+	def aStarPathFinding(self, start, goal, buffer):
+		self.nodes = self.addBuffer(buffer)
+		openset = set()
+		closedset = set()
+		current = start
+		current.gCost = 0
+		openset.add(current)
+		while openset:
+			current = min(openset, key=lambda o:o.findF(start,goal))
+			if current.x == goal.x and current.y == goal.y:
+				path = []
+				while current.parent:
+					print(current.x, current.y)
+					path.append(current)
+					current = current.parent
+				path.append(current)
+				return self.toPublishable(path[::-1])
+			openset.remove(current)
+			closedset.add(current)
+			for node in self.findChildren(current):
+				if node in closedset or node.state == -1:
+					continue
+				if node in openset: 
+					new_f = current.findF(start, goal)
+					if node.fCost > new_f:
+						node.fCost = new_f
+						node.parent = current
+				else:
+					current.gCost = node.gCost + 1
+					node.findF(start,goal)
+					node.parent = current
+					openset.add(node)
+		raise ValueError('No Path Found')
+		print("Finished A*")
 
 	def toPublishable(self,listOfNodes):
 		listOfPoints = []
@@ -71,6 +74,7 @@ class aStar:
 				if(node.state == -1): # if the node is a wall
 					for child in self.findChildrenRadius(node,radius):
 						child.type = -1
+		print("Buffer was set")
 		return self.nodes
 
 
@@ -92,7 +96,6 @@ class aStar:
 				notLessThanGrid=not(searchX<0) and not(searchY<0)
 
 				if(notSelf and notLargerThanGrid and notLessThanGrid):
-					print(searchX,searchY)
 					listOfNodes.append(self.nodes[searchX][searchY])
 
 		return listOfNodes

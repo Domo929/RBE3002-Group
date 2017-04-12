@@ -24,7 +24,6 @@ def saveMap(input):
                 tempNode = Node(x,y,0)
             mainMap[x][y]=tempNode
 
-
 if __name__ == '__main__':
     global mainMap 
     mainMap = []
@@ -34,11 +33,10 @@ if __name__ == '__main__':
 
     rospy.init_node('aStar')
 
-    start = mainMap[1][1]
-    end = mainMap[10][10]
+    start = mainMap[3][3]
+    end = mainMap[1][3]
 
-    aStar(mainMap).addBuffer(1)
-    pathReturned = aStar(mainMap).aStarPathFinding(start,end)
+    pathReturned = aStar(mainMap).aStarPathFinding(start,end,1)
     
     pubPathInfo = GridCells()
     pubPathInfo.header.frame_id = "map"
@@ -82,8 +80,10 @@ if __name__ == '__main__':
     waypointsToPublish.header.frame_id = 'map'
     waypointsToPublish.poses = listOfWaypoints
     
+    print("Before Here")
     while not rospy.is_shutdown():
         pubWaypoint.publish(waypointsToPublish)
         pubPath.publish(pubPathInfo)
         rospy.sleep(rospy.Duration(1))
+    print("After Here")
 
