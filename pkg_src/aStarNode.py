@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import rospy, tf, drivingCode.py
+import rospy, tf
+from drivingCode import *
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point, PoseStamped
 from Node import Node
@@ -80,7 +81,7 @@ if __name__ == '__main__':
 
     for waypoint in listOfWaypoints:
         navToPose(waypoint)
-        
+
     waypointsToPublish = Path()
     waypointsToPublish.header.frame_id = 'map'
     waypointsToPublish.poses = listOfWaypoints

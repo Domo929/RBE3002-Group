@@ -12,6 +12,7 @@ from geometry_msgs.msg import PoseStamped
 def navToPose(goal):
     global pose
     global goalPose
+    goalPose = pose
 
     quaternion = (  #add values into quaternion in order to convert
         pose.orientation.x,
@@ -201,7 +202,7 @@ def readGoal(goal):
 # This is the program's main function
 def initDrivingCode():
     # Change this node name to include your username
-    rospy.init_node('sample_Lab_2_node')
+    #rospy.init_node('sample_Lab_2_node')
 
     # These are global variables. Write "global <variable_name>" in any other function to gain access to these global variables 
     global pub
