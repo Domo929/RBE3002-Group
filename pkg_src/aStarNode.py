@@ -3,7 +3,7 @@
 import rospy, tf
 from drivingCode import *
 from nav_msgs.msg import OccupancyGrid
-from geometry_msgs.msg import Point, PoseStamped
+from geometry_msgs.msg import Point, PoseStamped, PoseWithCovarianceStamped
 from Node import Node
 from aStar import aStar
 from nav_msgs.msg import GridCells, Path
@@ -24,19 +24,49 @@ def saveMap(input):
             else:
                 tempNode = Node(x,y,0)
             mainMap[x][y]=tempNode
+def setStart(msg):
+	global StartPose
+	global mainMap
+	global start
+	StartPose = Pose()
+	StartPose.position = msg.pose.position
+	StartPose.orientation = msg.pose.orientation
+	start = mainMap[StartPose.position.x][StartPose.position.y]
+
+def setGoal(msg):
+	global GoalPose
+	global mainMap
+	global goal
+	GoalPose = Pose()
+	GoalPose.position = msg.pose.position
+	GoalPose.orientation = msg.pose.orientation
+	goal = mainMap[GoalPose.position.x][GoalPose.position.y]
 
 if __name__ == '__main__':
     global mainMap 
+    global StartPose
+    global GoalPose
+    global start
+    global end
+
     mainMap = []
+    start = None
+    end = None
+
     subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=10)
+
+    StartSub = rospy.Subscriber('/initlalpose', PoseWithCovarianceStamped, setStart, queue_size=10)
+    GoalSub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, setGoal, queue_size=10)
+
     pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
     pubWaypoint = rospy.Publisher('/waypoint',Path,queue_size=10)
     initDrivingCode()
 
     rospy.init_node('aStar')
 
-    start = mainMap[2][2]
-    end = mainMap[10][10]
+    while start == None or end == None:
+    	rospy.sleep(rospy.Duration(1))
+
 
     aStar(mainMap).addBuffer(1)
     pathReturned = aStar(mainMap).aStarPathFinding(start,end)
