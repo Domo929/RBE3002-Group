@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import rospy, tf
+import rospy, tf, drivingCode.py
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point, PoseStamped
 from Node import Node
@@ -30,6 +30,7 @@ if __name__ == '__main__':
     subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=10)
     pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
     pubWaypoint = rospy.Publisher('/waypoint',Path,queue_size=10)
+    initDrivingCode()
 
     rospy.init_node('aStar')
 
@@ -77,6 +78,9 @@ if __name__ == '__main__':
     tempPose.pose.position.y=pathReturned[len(pathReturned)-1].y
     listOfWaypoints.append(tempPose)
 
+    for waypoint in listOfWaypoints:
+        navToPose(waypoint)
+        
     waypointsToPublish = Path()
     waypointsToPublish.header.frame_id = 'map'
     waypointsToPublish.poses = listOfWaypoints

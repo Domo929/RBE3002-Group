@@ -59,52 +59,6 @@ def navToPose(goal):
     print "done"
     pass
 
-
-#This function sequentially calls methods to perform a trajectory.
-def executeTrajectory():
-    print "Drive striaght"
-    driveStraight(.2, .6)
-    print "Rotate"
-    rotate(-3.14/2)
-    print "Drive striaght2"
-    driveStraight(.2,.45)
-    print "Rotate"
-    rotate(135*3.14/180.0)
-
-#This function accepts two wheel velocities and a time interval.
-#takes velocitys of both wheels computs the translational and rotational robot velocities 
-#and drives the robot for the specified period of time
-#u1 = left
-#u2 = right
-def spinWheels(u1,u2,time):
-    #calculate rotational velocity from linear velocity
-    #set wheels to that speed for given period of time
-    global L
-
-    started = rospy.Time.now().secs 
-
-    #calculate velocities
-    if(u1-u2 != 0):
-        omega = (u2-u1)/L
-        R = (L/2.0)*(u1+u2)/(u2-u1)
-        tanVel=abs(R)*omega
-
-        #create msg to send
-        twist=Twist()
-        twist.linear.x=tanV
-        twist.angular.z=omega
-    else:
-        twist=Twist()
-        twist.linear.x=u1
-        twist.angular.z=0
-
-    while(rospy.Time.now().secs-started > 0):
-        #publish message
-        pub.publish(twist)
-    stop = Twist()
-    pub.publish(twist)
-
-
 #This function accepts a speed and a distance for the robot to move in a straight line
 def driveStraight(speed, distance):
     global pose
@@ -233,19 +187,6 @@ def readBumper(msg):
     if (msg.state == 1):
         executeTrajectory()
 
-
-
-# (Optional) If you need something to happen repeatedly at a fixed interval, write the code here.
-# Start the timer with the following line of code: 
-#   rospy.Timer(rospy.Duration(.01), timerCallback)
-def timerCallback(event):
-    global pose
-    pose = Pose()
-
-    (position, orientation) = odom_list.lookupTransform('...','...', rospy.Time(0)) #finds the position and oriention of two objects relative to each other (hint: this returns arrays, while Pose uses lists)
-    
-    pass # Delete this 'pass' once implemented
-
 def odomPrint(msg):
     global pose
     pose = msg.pose.pose
@@ -258,7 +199,7 @@ def readGoal(goal):
 
 
 # This is the program's main function
-if __name__ == '__main__':
+def initDrivingCode():
     # Change this node name to include your username
     rospy.init_node('sample_Lab_2_node')
 
@@ -284,20 +225,5 @@ if __name__ == '__main__':
     #print odom_list
     # Use this command to make the program wait for some seconds
     #rospy.sleep(rospy.Duration(1, 0))
-    print "Starting Lab 2"
-    rospy.sleep(2) #delay to make sure that pose is published before trying to read it
-    
-    
-    #driveStraight(.2, 1)
-    driveArc(.5,.3,3.14/4)
-    #rotate(3.14)
-    
-    #executeTrajectory()
-    print "doneDriving"
-    #driveArc(2, .2, 3.14/2)
-    #make the robot keep doing something...
-    #rospy.Timer(rospy.Duration(...), timerCallback)
-    #rospy.spin()
-    # Make the robot do stuff...
-    rospy.spin() #Don't let script close until done
+
     print "Lab 2 complete!"
