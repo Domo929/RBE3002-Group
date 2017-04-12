@@ -38,7 +38,7 @@ floorplan
 # throw in a robot
 turtlebot
 (
-  pose [ 1.0 2.0 0.0 0.0 ]
+  pose [ 1 1 0.0 0.0 ]
   name "turtlebot"
   color "black"
   #Shape of robot
