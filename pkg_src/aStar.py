@@ -7,7 +7,7 @@ from geometry_msgs.msg import Point
 
 class aStar:
 	pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
-
+	pubBuffer = rospy.Publisher('/mapData/Buffer',GridCells,queue_size=10)
 	def __init__(self, nodeList):
 		self.nodes = nodeList
 		self.path = []
@@ -23,7 +23,7 @@ class aStar:
 			if current.x == goal.x and current.y == goal.y:
 				path = []
 				while current.parent:
-					print(current.x, current.y)
+					#print(current.x, current.y)
 					path.append(current)
 					current = current.parent
 				path.append(current)
@@ -68,12 +68,27 @@ class aStar:
 		return listOfNodes
 
 	def addBuffer(self, radius):
+		addedNodes = []
 		for x in self.nodes:
 			for node in x:
 				if(node.state == -1): # if the node is a wall
 					for child in self.findChildrenRadius(node,radius):
-						child.state = -1
+						#child.state = -1
+						if(child.state != -1):
+							addedNodes.append(child)
 		print("Buffer was set")
+		
+		for node in addedNodes:
+			node.state=-1
+
+		pubPathInfo = GridCells()
+		pubPathInfo.header.frame_id = "map"
+		pubPathInfo.cell_width =1
+		pubPathInfo.cell_height=1
+		pubPathInfo.cells = self.toPublishable(addedNodes)
+		while(1==1):
+			self.pubBuffer.publish(pubPathInfo)
+		#print(pubPath)
 		return self.nodes
 
 
