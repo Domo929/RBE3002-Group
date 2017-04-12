@@ -12,8 +12,7 @@ class aStar:
 		self.nodes = nodeList
 		self.path = []
 
-	def aStarPathFinding(self, start, goal, buffer):
-		self.nodes = self.addBuffer(buffer)
+	def aStarPathFinding(self, start, goal):
 		openset = set()
 		closedset = set()
 		current = start
@@ -73,7 +72,7 @@ class aStar:
 			for node in x:
 				if(node.state == -1): # if the node is a wall
 					for child in self.findChildrenRadius(node,radius):
-						child.type = -1
+						child.state = -1
 		print("Buffer was set")
 		return self.nodes
 

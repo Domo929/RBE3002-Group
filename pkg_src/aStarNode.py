@@ -34,9 +34,10 @@ if __name__ == '__main__':
     rospy.init_node('aStar')
 
     start = mainMap[3][3]
-    end = mainMap[1][3]
+    end = mainMap[3][4]
 
-    pathReturned = aStar(mainMap).aStarPathFinding(start,end,1)
+    aStar(mainMap).addBuffer(1)
+    pathReturned = aStar(mainMap).aStarPathFinding(start,end)
     
     pubPathInfo = GridCells()
     pubPathInfo.header.frame_id = "map"
