@@ -75,11 +75,11 @@ if __name__ == '__main__':
 
     
     rospy.init_node('aStar')
-    #initDrivingCode()
     rospy.sleep(rospy.Duration(1))
     start = mainMap[3][3]
     end = mainMap[10][10]
 
+    #create gridcell output for buffercells
     buffCell = GridCells()
     buffCell.header.frame_id = "map"
     buffCell.cell_width =resolution
@@ -88,16 +88,16 @@ if __name__ == '__main__':
 
     pathReturned = aStar(mainMap).aStarPathFinding(start,end)
 
+    #create gridcell output for path
     pathCell = GridCells()
     pathCell.header.frame_id = "map"
     pathCell.cell_width =resolution
     pathCell.cell_height=resolution
     pathCell.cells = convertToGridScaling(pathReturned)
-    
-    # for i in range(0, len(pathReturned)):
-    #     print("Path", pathReturned[i].x, pathReturned[i].y)
+
+    #create list of waypoints
     listOfWaypoints = []
-    for x in range(1, len(pathReturned)-1):
+    for x in range(1, len(pathReturned)-1):  
         currentNode = pathReturned[x]
         nextNode = pathReturned[x+1]
         previousNode = pathReturned[x-1]
@@ -122,8 +122,8 @@ if __name__ == '__main__':
 #Last Waypoint
     tempPose = PoseStamped()
     tempPose.header.frame_id = 'map'
-    tempPose.pose.position.x= pathReturned[-1].x# end.x *resolution
-    tempPose.pose.position.y= pathReturned[-1].y#end.y *resolution
+    tempPose.pose.position.x= pathReturned[-1].x
+    tempPose.pose.position.y= pathReturned[-1].y
     listOfWaypoints.append(tempPose)
 
 #First Waypoint
@@ -132,29 +132,23 @@ if __name__ == '__main__':
     tempPose.pose.position.x= pathReturned[0].x
     tempPose.pose.position.y= pathReturned[0].y
     listOfWaypoints.insert(0,tempPose)
-    print("first waypoint",listOfWaypoints[0])
+
+#turn list of waypoints into publishable path
     waypointsToPublish = Path()
     waypointsToPublish.header.frame_id = 'map'
     waypointsToPublish.poses = listOfWaypoints
 
-    
-    # while(1):
-    #     pubWaypoint.publish(waypointsToPublish)
-    
-    #listOfWaypoints = list(reversed(listOfWaypoints))
-    listOfWaypoints.pop(0)
-    print(listOfWaypoints)
-    for waypoint in listOfWaypoints:
+    listOfWaypoints.pop(0) #remove starting position
+
+    for waypoint in listOfWaypoints: #go through all waypoints and publish them
         pubBuffer.publish(buffCell)
         pubWaypoint.publish(waypointsToPublish)
         pubPath.publish(pathCell)
         rospy.sleep(rospy.Duration(1))
         goal_pub.publish(waypoint)
-        print("waypoint",waypoint)
-        #navToPose(waypoint)
-        # nav_pose_service(waypoint)
-        # print "Pose sent to service"
-    
+
+        
+    # uncomment to output list of waypoint with pretty formatting
     # for waypoint in listOfWaypoints:
     #     fancyString="{}, {}, {}"
     #     print("Waypoint", waypoint)

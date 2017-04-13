@@ -51,7 +51,7 @@ def navToPose(goal):
     print "spin!" #turn to calculated angle
     rotateDegrees(initialTurn)
     print "move!" #move in straight line specified distance to new pose
-    driveStraight(0.15, distance)
+    driveSmooth(0.2, distance)
     rospy.sleep(2)
     print "spin!" #spin to final angle
     finalTurn = desiredT - theta
@@ -59,15 +59,6 @@ def navToPose(goal):
     rotateDegrees(finalTurn)
     print "done"
     return "Done"
-
-
-def executeTrajectory():
-    """This function sequentially calls methods to perform a trajectory."""
-    driveStraight(1, 0.6)
-    rotateDegrees(-90)
-    driveStraight(1, .45)
-    rotate(135)
-
 
 def spinWheels(u1, u2, time):
     """This function accepts two wheel velocities and a time interval."""
@@ -92,56 +83,33 @@ def spinWheels(u1, u2, time):
     pub.publish(stop_msg)
 
 
-def driveStraight(speed, distance):
-    """This function accepts a speed and a distance for the robot to move in a straight line"""
-    global pose
-    initialX = pose.pose.position.x
-    initialY = pose.pose.position.y
-
-    atTarget = False
-    while (not atTarget and not rospy.is_shutdown()):
-        currentX = pose.pose.position.x
-        currentY = pose.pose.position.y
-        currentDistance = math.sqrt(math.pow((currentX - initialX), 2) + math.pow((currentY - initialY), 2))
-        #currentDistance *=3.3
-        print("current distance",currentDistance)
-        if (currentDistance >= distance):
-            atTarget = True
-            sendMoveMsg(0, 0)
-        else:
-            sendMoveMsg(speed, 0)
-            rospy.sleep(0.15)
-
-
 def driveSmooth(speed, distance):
-    """This function accepts a speed and a distance for the robot to move in a smoothed straight line."""
     global pose
 
-    initialX = pose.pose.position.x
-    initialY = pose.pose.position.y
-    atTarget = False
-    rampSpeed = 0.0
-    sleepTime = 0.05
-    rampPercentage = 0.3
-    step = speed / ((rampPercentage * (distance / speed)) / sleepTime)
-    print "Step size: " + str(step)
-    while (not atTarget and not rospy.is_shutdown()):
-        currentX = pose.pose.position.x
-        currentY = pose.pose.position.y
-        currentDistance = math.sqrt(math.pow((currentX - initialX), 2) + math.pow((currentY - initialY), 2))
-        if (currentDistance >= distance):
-            atTarget = True
-            sendMoveMsg(0, 0)
+    Kp = 5
+    dTraveled = 0
+    initialPos = pose.pose #set inital position
+
+    twist=Twist()  #create message and set values to driving striaght at 'speed'
+    twist.linear.x=speed
+    #all other values default to 0
+    error = distance -dTraveled
+    while(abs(error) > 0.005 and not rospy.is_shutdown()): #while you have traveled less than distance
+        dTraveled = math.sqrt((pose.pose.position.x-initialPos.position.x)**2+(pose.pose.position.y-initialPos.position.y)**2) # sqrt(delta x^2 + delta y^2) Distance traveled
+        #print dTraveled
+        if(speed*error*Kp>speed):
+            twist.linear.x=speed
+            #all other values default to 0
         else:
-            if ((distance - currentDistance) <= distance * rampPercentage and rampSpeed >= 0):
-                rampSpeed -= step
-                sendMoveMsg(rampSpeed, 0)
-            elif ((distance - currentDistance) >= distance * (1.0 - rampPercentage) and rampSpeed <= speed):
-                rampSpeed += step
-                sendMoveMsg(rampSpeed, 0)
-            else:
-                sendMoveMsg(speed, 0)
-            rospy.sleep(sleepTime)
+            twist.linear.x=speed*error*Kp  #publish speeds
+            #all other values default to 0
+
+        pub.publish(twist)  #publish speeds
+        error = distance - dTraveled
+
+
+    stop = Twist()#all values default to 0 so this msg will stop the robot
+    pub.publish(stop)
 
 def rotate(angle):
     global pose
@@ -187,45 +155,6 @@ def rotate(angle):
 
     stop = Twist()#all values default to 0 so this msg will stop the robot
     pub.publish(stop)
-# def rotate(angle):
-#     """Accepts an angle and makes the robot rotate around it."""
-#     global odom_list
-#     global pose
-
-#     #This node was created using Coordinate system transforms and numpy arrays.
-#     #The goal is measured in the turtlebot's frame, transformed to the odom.frame 
-#     transformer = tf.TransformerROS()   
-#     rotation = numpy.array([[math.cos(angle), -math.sin(angle), 0], #Create goal rotation
-#                             [math.sin(angle), math.cos(angle), 0],
-#                             [0,          0,          1]])
-
-#     #Get transforms for frames
-#     odom_list.waitForTransform('odom', 'base_footprint', rospy.Time(0), rospy.Duration(4.0))
-#     (trans, rot) = odom_list.lookupTransform('odom', 'base_footprint', rospy.Time(0))
-#     T_o_t = transformer.fromTranslationRotation(trans, rot)
-#     R_o_t = T_o_t[0:3,0:3]
-
-#     #Setup goal matrix
-#     goal_rot = numpy.dot(rotation, R_o_t)
-#     goal_o = numpy.array([[goal_rot[0,0], goal_rot[0,1], goal_rot[0,2], T_o_t[0,3]],
-#                     [goal_rot[1,0], goal_rot[1,1], goal_rot[1,2], T_o_t[1,3]],
-#                     [goal_rot[2,0], goal_rot[2,1], goal_rot[2,2], T_o_t[2,3]],
-#                     [0,             0,             0,             1]])
-
-#     #Continues creating and matching coordinate transforms.
-#     done = False
-#     while (not done and not rospy.is_shutdown()):
-#         (trans, rot) = odom_list.lookupTransform('odom', 'base_footprint', rospy.Time(0))
-#         state = transformer.fromTranslationRotation(trans, rot)
-#         within_tolerance = abs((state - goal_o)) < .1
-#         if ( within_tolerance.all() ):
-#             spinWheels(0,0,0)
-#             done = True
-#         else:
-#             if (angle > 0):
-#                 spinWheels(1,-1,.1)
-#             else:
-#                 spinWheels(-1,1,.1)
 
 def rotateDegrees(angle):
     """Rotate and angle in degrees."""
