@@ -273,7 +273,6 @@ if __name__ == '__main__':
     global pose
     global odom_list
     global odom_tf
-    print("1")
     #navServer = rospy.Service('/nav_to_pose', PoseStamped, navToPose)
     pub = rospy.Publisher('cmd_vel_mux/input/teleop', Twist, None, queue_size=10) # Publisher for commanding robot motion
     bumper_sub = rospy.Subscriber('mobile_base/events/bumper', BumperEvent, readBumper, queue_size=1) # Callback function to handle bumper events
@@ -282,8 +281,6 @@ if __name__ == '__main__':
     odom_list = tf.TransformListener()
     odom_tf = tf.TransformBroadcaster()
     odom_tf.sendTransform((0, 0, 0),(0, 0, 0, 1),rospy.Time.now(),"base_footprint","odom")
-
-    print "Starting Lab 2"
 
     while not rospy.is_shutdown():
         rospy.spin()
