@@ -28,8 +28,8 @@ def navToPose(goal):
     global yPosition
     global theta
     #capture desired x and y positions
-    desiredY = goal.pose.position.y
-    desiredX = goal.pose.position.x
+    desiredY = goal.pose.position.y #*.3
+    desiredX = goal.pose.position.x #*.3
     #capture desired angle
     quat = goal.pose.orientation
     q = [quat.x, quat.y, quat.z, quat.w]
@@ -37,8 +37,8 @@ def navToPose(goal):
     desiredT = yaw * (180.0/math.pi)
     #compute distance to target
     distance = math.sqrt(math.pow((desiredX - xPosition), 2) + math.pow((desiredY - yPosition), 2))
-    adjustedX = goal.pose.position.x - xPosition
-    adjustedY = goal.pose.position.y - yPosition
+    adjustedX = (goal.pose.position.x - xPosition)#*.3
+    adjustedY = (goal.pose.position.y - yPosition)#*.3
     print goal.pose.position.x, goal.pose.position.y
     print xPosition, yPosition
     print adjustedX, adjustedY
@@ -94,7 +94,6 @@ def spinWheels(u1, u2, time):
 def driveStraight(speed, distance):
     """This function accepts a speed and a distance for the robot to move in a straight line"""
     global pose
-
     initialX = pose.pose.position.x
     initialY = pose.pose.position.y
 
@@ -146,7 +145,7 @@ def rotate(angle):
     """Accepts an angle and makes the robot rotate around it."""
     global odom_list
     global pose
-    angle = angle%(3.14*2)
+
     #This node was created using Coordinate system transforms and numpy arrays.
     #The goal is measured in the turtlebot's frame, transformed to the odom.frame 
     transformer = tf.TransformerROS()   
@@ -221,9 +220,9 @@ def readOdom(msg):
 
 
 # This is the program's main function
-if __name__ == '__main__':
-    rospy.init_node('sample_Lab_2_node_ajlockman')
-#def initDrivingCode():
+#if __name__ == '__main__':
+#    rospy.init_node('sample_Lab_2_node_ajlockman')
+def initDrivingCode():
     global pub
     global pose
     global odom_list
@@ -240,7 +239,7 @@ if __name__ == '__main__':
 
     print "Starting Lab 2"
 
-    while not rospy.is_shutdown():
-        rospy.spin()
+    #while not rospy.is_shutdown():
+    #    rospy.spin()
     
     print "Lab 2 complete!"

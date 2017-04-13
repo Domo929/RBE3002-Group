@@ -75,14 +75,15 @@ if __name__ == '__main__':
 
     rospy.sleep(rospy.Duration(1))
     rospy.init_node('aStar')
+    initDrivingCode()
     start = mainMap[3][3]
-    end = mainMap[10][10]
+    end = mainMap[3][10]
 
     buffCell = GridCells()
     buffCell.header.frame_id = "map"
     buffCell.cell_width =resolution
     buffCell.cell_height=resolution
-    buffCell.cells = convertToGridScaling(aStar(mainMap).addBuffer(1))
+    buffCell.cells = convertToGridScaling(aStar(mainMap).addBuffer(2))
 
     pathReturned = aStar(mainMap).aStarPathFinding(start,end)
 
@@ -125,23 +126,29 @@ if __name__ == '__main__':
     listOfWaypoints.append(tempPose)
 
 #First Waypoint
-    tempPose = PoseStamped()
-    tempPose.header.frame_id = 'map'
-    tempPose.pose.position.x=pathReturned[0].x
-    tempPose.pose.position.y=pathReturned[0].y
-    listOfWaypoints.insert(0,tempPose)
-
-    # holder = reversed(listOfWaypoints)
-    # for waypoint in holder:
-    #     navToPose(waypoint)
+    # tempPose = PoseStamped()
+    # tempPose.header.frame_id = 'map'
+    # tempPose.pose.position.x=pathReturned[0].x
+    # tempPose.pose.position.y=pathReturned[0].y
+    # listOfWaypoints.insert(0,tempPose)
 
     waypointsToPublish = Path()
     waypointsToPublish.header.frame_id = 'map'
     waypointsToPublish.poses = listOfWaypoints
+    # holder = reversed(listOfWaypoints)
     for waypoint in listOfWaypoints:
-        fancyString="{}, {}, {}"
-        print("Waypoint", waypoint)
-        print(fancyString.format(waypoint.pose.position.x, waypoint.pose.position.y, waypoint.pose.orientation.z))
+        print waypoint
+        pubBuffer.publish(buffCell)
+        pubWaypoint.publish(waypointsToPublish)
+        pubPath.publish(pathCell)
+        rospy.sleep(rospy.Duration(1))
+        navToPose(waypoint)
+
+    
+    # for waypoint in listOfWaypoints:
+    #     fancyString="{}, {}, {}"
+    #     print("Waypoint", waypoint)
+    #     print(fancyString.format(waypoint.pose.position.x, waypoint.pose.position.y, waypoint.pose.orientation.z))
     
     print("Before Here")
     while not rospy.is_shutdown():
