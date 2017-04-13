@@ -12,7 +12,7 @@ import math
 def convertToGridScaling(arr):
     global resolution
     for i in range(0, len(arr)):
-        arr[i].x=arr[i].x*resolution + 0.6
+        arr[i].x=arr[i].x*resolution + 0.1
         arr[i].y=arr[i].y*resolution + 0.2
     return arr
 
