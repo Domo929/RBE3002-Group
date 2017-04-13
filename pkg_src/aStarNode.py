@@ -76,7 +76,7 @@ if __name__ == '__main__':
     rospy.sleep(rospy.Duration(1))
     rospy.init_node('aStar')
     start = mainMap[3][3]
-    end = mainMap[3][10]
+    end = mainMap[10][10]
 
     buffCell = GridCells()
     buffCell.header.frame_id = "map"
@@ -92,16 +92,16 @@ if __name__ == '__main__':
     pathCell.cell_height=resolution
     pathCell.cells = convertToGridScaling(pathReturned)
     
-
-    lastPose = pathReturned[0]
+    # for i in range(0, len(pathReturned)):
+    #     print("Path", pathReturned[i].x, pathReturned[i].y)
     listOfWaypoints = []
     for x in range(1, len(pathReturned)-1):
         current = pathReturned[x]
         next = pathReturned[x+1]
         previous = pathReturned[x-1]
 
-        angleToNextPoint = math.atan2(next.y-current.y,(next.x-current.x))
-        prevToCurrentAngle = math.atan2(current.y-previous.y,(current.x-previous.x))
+        angleToNextPoint = math.atan2(-(next.y-current.y),-(next.x-current.x))
+        prevToCurrentAngle = math.atan2(-(current.y-previous.y),-(current.x-previous.x))
 
         if(prevToCurrentAngle!=angleToNextPoint):
             quaternion = tf.transformations.quaternion_from_euler(0,0,angleToNextPoint)
@@ -117,18 +117,19 @@ if __name__ == '__main__':
 
             listOfWaypoints.append(tempPose)
 
+#Last Waypoint
+    tempPose = PoseStamped()
+    tempPose.header.frame_id = 'map'
+    tempPose.pose.position.x=pathReturned[-1].x
+    tempPose.pose.position.y=pathReturned[-1].y
+    listOfWaypoints.append(tempPose)
+
+#First Waypoint
     tempPose = PoseStamped()
     tempPose.header.frame_id = 'map'
     tempPose.pose.position.x=pathReturned[0].x
     tempPose.pose.position.y=pathReturned[0].y
-    listOfWaypoints.append(tempPose)
-
-    tempPose = PoseStamped()
-    tempPose.header.frame_id = 'map'
-    tempPose.pose.position.x=pathReturned[len(pathReturned)-1].x
-    tempPose.pose.position.y=pathReturned[len(pathReturned)-1].y
-    listOfWaypoints.append(tempPose)
-
+    listOfWaypoints.insert(0,tempPose)
 
     # holder = reversed(listOfWaypoints)
     # for waypoint in holder:
@@ -137,6 +138,10 @@ if __name__ == '__main__':
     waypointsToPublish = Path()
     waypointsToPublish.header.frame_id = 'map'
     waypointsToPublish.poses = listOfWaypoints
+    for waypoint in listOfWaypoints:
+        fancyString="{}, {}, {}"
+        print("Waypoint", waypoint)
+        print(fancyString.format(waypoint.pose.position.x, waypoint.pose.position.y, waypoint.pose.orientation.z))
     
     print("Before Here")
     while not rospy.is_shutdown():
