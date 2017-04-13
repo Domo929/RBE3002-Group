@@ -98,20 +98,20 @@ if __name__ == '__main__':
     #     print("Path", pathReturned[i].x, pathReturned[i].y)
     listOfWaypoints = []
     for x in range(1, len(pathReturned)-1):
-        current = pathReturned[x]
-        next = pathReturned[x+1]
-        previous = pathReturned[x-1]
+        currentNode = pathReturned[x]
+        nextNode = pathReturned[x+1]
+        previousNode = pathReturned[x-1]
 
-        angleToNextPoint = math.atan2(-(next.y-current.y),-(next.x-current.x))
-        prevToCurrentAngle = math.atan2(-(current.y-previous.y),-(current.x-previous.x))
+        angleToNextPoint = math.atan2((nextNode.y-currentNode.y),(nextNode.x-currentNode.x))
+        prevToCurrentAngle = math.atan2((currentNode.y-previousNode.y),(currentNode.x-previousNode.x))
 
         if(prevToCurrentAngle!=angleToNextPoint):
             quaternion = tf.transformations.quaternion_from_euler(0,0,angleToNextPoint)
             
             tempPose = PoseStamped()
             tempPose.header.frame_id = 'map'
-            tempPose.pose.position.x=current.x
-            tempPose.pose.position.y=current.y
+            tempPose.pose.position.x=currentNode.x
+            tempPose.pose.position.y=currentNode.y
             tempPose.pose.orientation.x = quaternion[0]
             tempPose.pose.orientation.y = quaternion[1]
             tempPose.pose.orientation.z = quaternion[2]
