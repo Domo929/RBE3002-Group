@@ -9,6 +9,12 @@ from aStar import aStar
 from nav_msgs.msg import GridCells, Path
 import math
 
+def convertToGridScaling(arr):
+    global resolution
+    for i in range(0, len(arr)):
+        arr[i].x=arr[i].x*resolution + 0.6
+        arr[i].y=arr[i].y*resolution + 0.2
+    return arr
 
 def saveMap(input):
     global mainMap
@@ -50,7 +56,7 @@ if __name__ == '__main__':
     global StartPose
     global GoalPose
     global start
-    global end
+    global goal
     global resolution
     resolution = 0
     mainMap = []
@@ -58,55 +64,36 @@ if __name__ == '__main__':
     end = None
 
     subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=10)
-
-    StartSub = rospy.Subscriber('/initlalpose', PoseWithCovarianceStamped, setStart, queue_size=10)
-    GoalSub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, setGoal, queue_size=10)
+    # StartSub = rospy.Subscriber('/initlalpose', PoseWithCovarianceStamped, setStart, queue_size=10)
+    # GoalSub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, setGoal, queue_size=10)
 
     pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
     pubWaypoint = rospy.Publisher('/waypoint',Path,queue_size=10)
     pubBuffer = rospy.Publisher('/mapData/Buffer',GridCells,queue_size=10)
-    initDrivingCode()
+
+    #initDrivingCode()
+
     rospy.sleep(rospy.Duration(1))
-
     rospy.init_node('aStar')
+    start = mainMap[3][3]
+    end = mainMap[3][10]
 
-    #Remove when time to check Stage position settings
-    start = mainMap[2][2]
-    goal = mainMap[10][10]
+    buffCell = GridCells()
+    buffCell.header.frame_id = "map"
+    buffCell.cell_width =resolution
+    buffCell.cell_height=resolution
+    buffCell.cells = convertToGridScaling(aStar(mainMap).addBuffer(1))
 
-    # while start == None or end == None:
-    # 	rospy.sleep(rospy.Duration(1))
-
-
-    pubBuf = GridCells()
-    pubBuf.header.frame_id = "map"
-    pubBuf.cell_width =resolution
-    pubBuf.cell_height=resolution
-
-    temp=aStar(mainMap).addBuffer(1) #Adds Buffer
-    for i in range(0, len(temp)):
-        temp[i].x=temp[i].x*resolution + 0.6
-        temp[i].y=temp[i].y*resolution + 0.2
-    pubBuf.cells = temp
-
-
-    
     pathReturned = aStar(mainMap).aStarPathFinding(start,end)
 
-    for i in range(0, len(pathReturned)):
-        pathReturned[i].x=pathReturned[i].x*resolution + 0.6
-        pathReturned[i].y=pathReturned[i].y*resolution + 0.2
+    pathCell = GridCells()
+    pathCell.header.frame_id = "map"
+    pathCell.cell_width =resolution
+    pathCell.cell_height=resolution
+    pathCell.cells = convertToGridScaling(pathReturned)
+    
 
-    
-    pubPathInfo = GridCells()
-    pubPathInfo.header.frame_id = "map"
-    pubPathInfo.cell_width = resolution
-    pubPathInfo.cell_height= resolution
-    pubPathInfo.cells = pathReturned
-    
     lastPose = pathReturned[0]
-
-
     listOfWaypoints = []
     for x in range(1, len(pathReturned)-1):
         current = pathReturned[x]
@@ -132,14 +119,20 @@ if __name__ == '__main__':
 
     tempPose = PoseStamped()
     tempPose.header.frame_id = 'map'
+    tempPose.pose.position.x=pathReturned[0].x
+    tempPose.pose.position.y=pathReturned[0].y
+    listOfWaypoints.append(tempPose)
+
+    tempPose = PoseStamped()
+    tempPose.header.frame_id = 'map'
     tempPose.pose.position.x=pathReturned[len(pathReturned)-1].x
     tempPose.pose.position.y=pathReturned[len(pathReturned)-1].y
     listOfWaypoints.append(tempPose)
 
 
-    holder = reversed(listOfWaypoints)
-    for waypoint in holder:
-        navToPose(waypoint)
+    # holder = reversed(listOfWaypoints)
+    # for waypoint in holder:
+    #     navToPose(waypoint)
 
     waypointsToPublish = Path()
     waypointsToPublish.header.frame_id = 'map'
@@ -147,9 +140,9 @@ if __name__ == '__main__':
     
     print("Before Here")
     while not rospy.is_shutdown():
-        pubBuffer.publish(pubBuf)
+        pubBuffer.publish(buffCell)
         pubWaypoint.publish(waypointsToPublish)
-        pubPath.publish(pubPathInfo)
+        pubPath.publish(pathCell)
         rospy.sleep(rospy.Duration(1))
     print("After Here")
 
