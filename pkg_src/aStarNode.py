@@ -32,6 +32,7 @@ def saveMap(input):
             else:
                 tempNode = Node(x,y,0)
             mainMap[x][y]=tempNode
+
 def setStart(msg):
 	global StartPose
 	global mainMap
@@ -64,26 +65,26 @@ if __name__ == '__main__':
     end = None
 
     subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=10)
-    # StartSub = rospy.Subscriber('/initlalpose', PoseWithCovarianceStamped, setStart, queue_size=10)
-    # GoalSub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, setGoal, queue_size=10)
-
+    StartSub = rospy.Subscriber('/initlalpose', PoseWithCovarianceStamped, setStart, queue_size=10)
+    GoalSub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, setGoal, queue_size=10)
+    goal_pub = rospy.Publisher('move_base_simple/goal', PoseStamped, queue_size=1)
+    #nav_pose_service = rospy.ServiceProxy('PoseStamped',navToPose)
     pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
     pubWaypoint = rospy.Publisher('/waypoint',Path,queue_size=10)
     pubBuffer = rospy.Publisher('/mapData/Buffer',GridCells,queue_size=10)
 
-    #initDrivingCode()
-
-    rospy.sleep(rospy.Duration(1))
+    
     rospy.init_node('aStar')
     initDrivingCode()
+    rospy.sleep(rospy.Duration(1))
     start = mainMap[3][3]
-    end = mainMap[3][10]
+    end = mainMap[10][10]
 
     buffCell = GridCells()
     buffCell.header.frame_id = "map"
     buffCell.cell_width =resolution
     buffCell.cell_height=resolution
-    buffCell.cells = convertToGridScaling(aStar(mainMap).addBuffer(2))
+    buffCell.cells = convertToGridScaling(aStar(mainMap).addBuffer(1))
 
     pathReturned = aStar(mainMap).aStarPathFinding(start,end)
 
@@ -121,29 +122,38 @@ if __name__ == '__main__':
 #Last Waypoint
     tempPose = PoseStamped()
     tempPose.header.frame_id = 'map'
-    tempPose.pose.position.x=pathReturned[-1].x
-    tempPose.pose.position.y=pathReturned[-1].y
+    tempPose.pose.position.x= pathReturned[-1].x# end.x *resolution
+    tempPose.pose.position.y= pathReturned[-1].y#end.y *resolution
     listOfWaypoints.append(tempPose)
 
 #First Waypoint
-    # tempPose = PoseStamped()
-    # tempPose.header.frame_id = 'map'
-    # tempPose.pose.position.x=pathReturned[0].x
-    # tempPose.pose.position.y=pathReturned[0].y
-    # listOfWaypoints.insert(0,tempPose)
-
+    tempPose = PoseStamped()
+    tempPose.header.frame_id = 'map'
+    tempPose.pose.position.x= pathReturned[0].x
+    tempPose.pose.position.y= pathReturned[0].y
+    listOfWaypoints.insert(0,tempPose)
+    print("first waypoint",listOfWaypoints[0])
     waypointsToPublish = Path()
     waypointsToPublish.header.frame_id = 'map'
     waypointsToPublish.poses = listOfWaypoints
-    # holder = reversed(listOfWaypoints)
+
+    
+    # while(1):
+    #     pubWaypoint.publish(waypointsToPublish)
+    
+    #listOfWaypoints = list(reversed(listOfWaypoints))
+    listOfWaypoints.pop(0)
+    print(listOfWaypoints)
     for waypoint in listOfWaypoints:
-        print waypoint
         pubBuffer.publish(buffCell)
         pubWaypoint.publish(waypointsToPublish)
         pubPath.publish(pathCell)
         rospy.sleep(rospy.Duration(1))
+        #goal_pub.publish(waypoint)
+        print("waypoint",waypoint)
         navToPose(waypoint)
-
+        # nav_pose_service(waypoint)
+        # print "Pose sent to service"
     
     # for waypoint in listOfWaypoints:
     #     fancyString="{}, {}, {}"

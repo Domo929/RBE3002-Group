@@ -26,10 +26,10 @@ class aStar:
 				path = []
 				while current.parent:
 					#print(current.x, current.y)
-					path.insert(0,current)
+					path.append(current)
 					#path.append(current)
 					current = current.parent
-				path.insert(0,current)
+				path.append(current)
 				#path.append(current)
 				return self.toPublishable(path[::-1])
 			openset.remove(current)
