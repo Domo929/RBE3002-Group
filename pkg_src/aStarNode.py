@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy, tf
-from drivingCode import *
+#from drivingCode import *
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point, PoseStamped, PoseWithCovarianceStamped
 from Node import Node
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=10)
     StartSub = rospy.Subscriber('/initlalpose', PoseWithCovarianceStamped, setStart, queue_size=10)
     GoalSub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, setGoal, queue_size=10)
-    goal_pub = rospy.Publisher('move_base_simple/goal', PoseStamped, queue_size=1)
+    goal_pub = rospy.Publisher('move_base_simple/goal1', PoseStamped, queue_size=1)
     #nav_pose_service = rospy.ServiceProxy('PoseStamped',navToPose)
     pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
     pubWaypoint = rospy.Publisher('/waypoint',Path,queue_size=10)
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
     
     rospy.init_node('aStar')
-    initDrivingCode()
+    #initDrivingCode()
     rospy.sleep(rospy.Duration(1))
     start = mainMap[3][3]
     end = mainMap[10][10]
@@ -149,9 +149,9 @@ if __name__ == '__main__':
         pubWaypoint.publish(waypointsToPublish)
         pubPath.publish(pathCell)
         rospy.sleep(rospy.Duration(1))
-        #goal_pub.publish(waypoint)
+        goal_pub.publish(waypoint)
         print("waypoint",waypoint)
-        navToPose(waypoint)
+        #navToPose(waypoint)
         # nav_pose_service(waypoint)
         # print "Pose sent to service"
     

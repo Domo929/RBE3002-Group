@@ -266,9 +266,9 @@ def readOdom(msg):
 
 
 # This is the program's main function
-#if __name__ == '__main__':
-#    rospy.init_node('sample_Lab_2_node')
-def initDrivingCode():
+if __name__ == '__main__':
+    rospy.init_node('sample_Lab_2_node')
+#def initDrivingCode():
     global pub
     global pose
     global odom_list
@@ -277,7 +277,7 @@ def initDrivingCode():
     #navServer = rospy.Service('/nav_to_pose', PoseStamped, navToPose)
     pub = rospy.Publisher('cmd_vel_mux/input/teleop', Twist, None, queue_size=10) # Publisher for commanding robot motion
     bumper_sub = rospy.Subscriber('mobile_base/events/bumper', BumperEvent, readBumper, queue_size=1) # Callback function to handle bumper events
-    goal_sub = rospy.Subscriber('move_base_simple/goal', PoseStamped, navToPose, queue_size=100)
+    goal_sub = rospy.Subscriber('move_base_simple/goal1', PoseStamped, navToPose, queue_size=100)
     sub = rospy.Subscriber('/odom', Odometry, readOdom)
     odom_list = tf.TransformListener()
     odom_tf = tf.TransformBroadcaster()
@@ -285,7 +285,7 @@ def initDrivingCode():
 
     print "Starting Lab 2"
 
-    #while not rospy.is_shutdown():
-    #    rospy.spin()
+    while not rospy.is_shutdown():
+        rospy.spin()
     
     print "Lab 2 complete!"
