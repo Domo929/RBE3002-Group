@@ -3,9 +3,9 @@
 import rospy, tf, numpy, math
 from kobuki_msgs.msg import BumperEvent
 from std_msgs.msg import String
-from geometry_msgs.msg import Twist
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Twist, Point
+from nav_msgs.msg import Odometry, Path
+from geometry_msgs.msg import PoseStamped, Pose
 from tf.transformations import euler_from_quaternion
 
 wheel_rad = 3.5 / 100.0 
@@ -20,12 +20,19 @@ def sendMoveMsg(linearVelocity, angularVelocity):
     pub.publish(msg)
 
 
-def navToPose(goal):
+def navToPose(event):
+    global listOfWaypoints
     """Drive to a goal subscribed to from /move_base_simple/goal"""
+    
+    if(len(listOfWaypoints)==0):
+        return
+
+    goal = listOfWaypoints.pop(0)
     #compute angle required to make straight-line move to desired pose
     global xPosition
     global yPosition
     global theta
+    global newPath
     #capture desired x and y positions
     desiredY = goal.pose.position.y
     desiredX = goal.pose.position.x
@@ -58,6 +65,7 @@ def navToPose(goal):
     print "rotate " + str(finalTurn) +  " to " + str(desiredT)
     rotateDegrees(finalTurn)
     print "done"
+    newPath = False
     return "Done"
 
 def spinWheels(u1, u2, time):
@@ -85,6 +93,7 @@ def spinWheels(u1, u2, time):
 
 def driveSmooth(speed, distance):
     global pose
+    global newPath
 
     Kp = 5
     dTraveled = 0
@@ -94,7 +103,7 @@ def driveSmooth(speed, distance):
     twist.linear.x=speed
     #all other values default to 0
     error = distance -dTraveled
-    while(abs(error) > 0.005 and not rospy.is_shutdown()): #while you have traveled less than distance
+    while(abs(error) > 0.005 and not rospy.is_shutdown() and not newPath): #while you have traveled less than distance
         dTraveled = math.sqrt((pose.pose.position.x-initialPos.position.x)**2+(pose.pose.position.y-initialPos.position.y)**2) # sqrt(delta x^2 + delta y^2) Distance traveled
         #print dTraveled
         if(speed*error*Kp>speed):
@@ -113,6 +122,7 @@ def driveSmooth(speed, distance):
 
 def rotate(angle):
     global pose
+    global newPath
     Kp = 5
 
     quaternion = (  #add values into quaternion in order to convert
@@ -136,7 +146,7 @@ def rotate(angle):
     else:
         setSpeed=-0.4
 
-    while(abs(amountToTurn - yaw) > .005 and not rospy.is_shutdown()):
+    while(abs(amountToTurn - yaw) > .005 and not rospy.is_shutdown() and not newPath):
         pub.publish(twist)
         if(abs(setSpeed * (amountToTurn - yaw) *Kp) > abs(setSpeed)):
             twist.angular.z = setSpeed
@@ -172,6 +182,7 @@ def readBumper(msg):
 #Odometry Callback function.
 def readOdom(msg):
     """Read odometry messages and store into global variables."""
+    global currentPose
     global pose
     global xPosition
     global yPosition
@@ -179,6 +190,7 @@ def readOdom(msg):
     global odom_list
     global odom_tf
     try:
+        currentPose = msg.pose
         pose = msg.pose
         geo_quat = pose.pose.orientation
         q = [geo_quat.x, geo_quat.y, geo_quat.z, geo_quat.w]
@@ -190,28 +202,50 @@ def readOdom(msg):
         theta = yaw * (180.0/math.pi)
         xPosition = trans[0]
         yPosition = trans[1]
-    except:
-        print "Waiting for tf..."
 
+    except:
+        print "drivingCode waiting for tf..."
+
+def updateWaypoints(msg):
+    global listOfWaypoints
+    global newPath
+    print "waypoints recieved"
+    if(len(listOfWaypoints) == 0):
+        listOfWaypoints=msg.poses
+        newPath = True
+    else:
+        if(listOfWaypoints[1].x == msg.poses[1].x and listOfWaypoints[1].y == msg.poses[1].y):
+            listOfWaypoints=msg.poses
+            newPath = True
 
 # This is the program's main function
 if __name__ == '__main__':
-    rospy.init_node('sample_Lab_2_node')
+    rospy.init_node('Driving_Node')
 #def initDrivingCode():
     global pub
     global pose
+    global currentPose
     global odom_list
     global odom_tf
-    #navServer = rospy.Service('/nav_to_pose', PoseStamped, navToPose)
+    global listOfWaypoints
+    global newPath 
+    newPath = False
+    listOfWaypoints = [0,0]
+
+    location_Pub = rospy.Publisher('currentLocation', Point, None, queue_size=10)
     pub = rospy.Publisher('cmd_vel_mux/input/teleop', Twist, None, queue_size=10) # Publisher for commanding robot motion
     bumper_sub = rospy.Subscriber('mobile_base/events/bumper', BumperEvent, readBumper, queue_size=1) # Callback function to handle bumper events
-    goal_sub = rospy.Subscriber('move_base_simple/goal1', PoseStamped, navToPose, queue_size=100)
+    goal_sub = rospy.Subscriber('move_base_simple/goal1', Path, updateWaypoints, queue_size=100)
     sub = rospy.Subscriber('/odom', Odometry, readOdom)
     odom_list = tf.TransformListener()
     odom_tf = tf.TransformBroadcaster()
     odom_tf.sendTransform((0, 0, 0),(0, 0, 0, 1),rospy.Time.now(),"base_footprint","odom")
 
+    rospy.sleep(rospy.Duration(1))
+
+    rospy.Timer(rospy.Duration(.2), navToPose)
+
     while not rospy.is_shutdown():
-        rospy.spin()
-    
+        location_Pub.publish(currentPose.pose.position)
+
     print "Lab 2 complete!"
