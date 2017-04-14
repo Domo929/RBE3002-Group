@@ -1,13 +1,21 @@
 #!/usr/bin/env python
 
 import rospy, tf
-#from drivingCode import *
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point, PoseStamped, PoseWithCovarianceStamped
 from Node import Node
 from aStar import aStar
 from nav_msgs.msg import GridCells, Path
 import math
+
+
+def timerCallback(event):
+    print("Costmap stuff")
+    #costmap= mikesFunction(costmap)
+    #(trans, rot) = odom_list.lookupTransform('map', 'base_footprint', rospy.Time(0))
+def costmapCallback(data):
+    global costmap
+    costmap=data
 
 def convertToGridScaling(arr):
     global resolution
@@ -53,6 +61,8 @@ if __name__ == '__main__':
     global start
     global goal
     global resolution
+    global costmap
+    costmap=None
     resolution = 0
     mainMap = []
     start = None
@@ -61,14 +71,26 @@ if __name__ == '__main__':
     subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=10)
     StartSub = rospy.Subscriber('/initlalpose', PoseWithCovarianceStamped, setStart, queue_size=10)
     GoalSub = rospy.Subscriber('/move_base_simple/goal', PoseStamped, setGoal, queue_size=10)
+    costmapSub = rospy.Subscriber('/move_base/local_costmap/costmap',OccupancyGrid, queue_size=10)
+
+
     goal_pub = rospy.Publisher('move_base_simple/goal1', PoseStamped, queue_size=1)
-    #nav_pose_service = rospy.ServiceProxy('PoseStamped',navToPose)
     pubPath = rospy.Publisher('/mapData/Path',GridCells,queue_size=10)
     pubWaypoint = rospy.Publisher('/waypoint',Path,queue_size=10)
     pubBuffer = rospy.Publisher('/mapData/Buffer',GridCells,queue_size=10)
 
-    
     rospy.init_node('aStar')
+
+
+    #Tf setup
+    # odom_list = tf.TransformListener()
+    # odom_tf = tf.TransformBroadcaster()
+    # odom_tf.sendTransform((0, 0, 0),(0, 0, 0, 1),rospy.Time.now(),"base_footprint","odom")
+
+    #Costmap callback
+    rospy.Timer(rospy.Duration(0.2), timerCallback)
+
+
     rospy.sleep(rospy.Duration(1))
     start = mainMap[3][3]
     end = mainMap[10][10]
