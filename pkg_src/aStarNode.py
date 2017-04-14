@@ -15,16 +15,13 @@ def convertToGridScaling(arr):
         arr[i].x=arr[i].x*resolution + 0.1
         arr[i].y=arr[i].y*resolution + 0.2
     return arr
-
 def saveMap(input):
     global mainMap
     global resolution
     width = input.info.width
     height = input.info.height
     resolution = input.info.resolution
-    
     mainMap = [[0 for x in range(width)] for y in range(height)]
-    
     for y in range(0, height):
         for x in range(0, width):
             if(input.data[y*width+x]>50):
@@ -32,7 +29,6 @@ def saveMap(input):
             else:
                 tempNode = Node(x,y,0)
             mainMap[x][y]=tempNode
-
 def setStart(msg):
 	global StartPose
 	global mainMap
@@ -41,7 +37,6 @@ def setStart(msg):
 	StartPose.position = msg.pose.position
 	StartPose.orientation = msg.pose.orientation
 	start = mainMap[StartPose.position.x][StartPose.position.y]
-
 def setGoal(msg):
 	global GoalPose
 	global mainMap
@@ -50,7 +45,6 @@ def setGoal(msg):
 	GoalPose.position = msg.pose.position
 	GoalPose.orientation = msg.pose.orientation
 	goal = mainMap[GoalPose.position.x][GoalPose.position.y]
-
 if __name__ == '__main__':
 
     global mainMap 
@@ -118,42 +112,34 @@ if __name__ == '__main__':
             tempPose.pose.orientation.w = quaternion[3]
 
             listOfWaypoints.append(tempPose)
-
 #Last Waypoint
     tempPose = PoseStamped()
     tempPose.header.frame_id = 'map'
     tempPose.pose.position.x= pathReturned[-1].x
     tempPose.pose.position.y= pathReturned[-1].y
     listOfWaypoints.append(tempPose)
-
 #First Waypoint
     tempPose = PoseStamped()
     tempPose.header.frame_id = 'map'
     tempPose.pose.position.x= pathReturned[0].x
     tempPose.pose.position.y= pathReturned[0].y
     listOfWaypoints.insert(0,tempPose)
-
 #turn list of waypoints into publishable path
     waypointsToPublish = Path()
     waypointsToPublish.header.frame_id = 'map'
     waypointsToPublish.poses = listOfWaypoints
-
     listOfWaypoints.pop(0) #remove starting position
-
     for waypoint in listOfWaypoints: #go through all waypoints and publish them
         pubBuffer.publish(buffCell)
         pubWaypoint.publish(waypointsToPublish)
         pubPath.publish(pathCell)
         rospy.sleep(rospy.Duration(1))
         goal_pub.publish(waypoint)
-
-        
     # uncomment to output list of waypoint with pretty formatting
     # for waypoint in listOfWaypoints:
     #     fancyString="{}, {}, {}"
     #     print("Waypoint", waypoint)
     #     print(fancyString.format(waypoint.pose.position.x, waypoint.pose.position.y, waypoint.pose.orientation.z))
-    
     print("Before Here")
     while not rospy.is_shutdown():
         pubBuffer.publish(buffCell)

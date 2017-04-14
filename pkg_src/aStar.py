@@ -11,7 +11,6 @@ class aStar:
 	def __init__(self, nodeList):
 		self.nodes = nodeList
 		self.path = []
-
 	def aStarPathFinding(self, start, goal):
 		if(start.state==-1):
 			raise ValueError('Starting in a wall')
@@ -25,12 +24,9 @@ class aStar:
 			if current.x == goal.x and current.y == goal.y:
 				path = []
 				while current.parent:
-					#print(current.x, current.y)
 					path.append(current)
-					#path.append(current)
 					current = current.parent
 				path.append(current)
-				#path.append(current)
 				return self.toPublishable(path[::-1])
 			openset.remove(current)
 			closedset.add(current)
@@ -49,7 +45,6 @@ class aStar:
 					openset.add(node)
 		raise ValueError('No Path Found')
 		print("Finished A*")
-
 	def toPublishable(self,listOfNodes):
 		listOfPoints = []
 		for node in listOfNodes:
@@ -58,35 +53,27 @@ class aStar:
 			point.y=node.y
 			listOfPoints.append(point)
 		return listOfPoints
-
 	def findChildren(self,currentNode):
 		currentX=currentNode.x
 		currentY=currentNode.y
 		listOfNodes = []
-
 		for x in range(-1,2):
 			for y in range(-1,2):
 				if(not(x == 0 and y == 0)):
 					listOfNodes.append(self.nodes[currentX + x][currentY + y])
-
 		return listOfNodes
-
 	def addBuffer(self, radius):
 		addedNodes = []
 		for x in self.nodes:
 			for node in x:
-				if(node.state == -1): # if the node is a wall
+				if(node.state == -1):
 					for child in self.findChildrenRadius(node,radius):
 						if(child.state != -1):
 							addedNodes.append(child)
 		print("Buffer was set")
-		
 		for node in addedNodes:
 			node.state=-1
-
 		return self.toPublishable(addedNodes)
-
-
 	def findChildrenRadius(self, currentNode, radius):
 		width = len(self.nodes)
 		height = len(self.nodes[0])
@@ -95,7 +82,6 @@ class aStar:
 		listOfNodes = []
 		searchX=0
 		searchY=0
-
 		for x in range(-radius, radius + 1):
 			for y in range(-radius , radius + 1):
 				searchX=currentX+x
@@ -103,8 +89,6 @@ class aStar:
 				notSelf=not(x==0 and y==0)
 				notLargerThanGrid=not(searchX>=width) and not(searchY>=height)
 				notLessThanGrid=not(searchX<0) and not(searchY<0)
-
 				if(notSelf and notLargerThanGrid and notLessThanGrid):
 					listOfNodes.append(self.nodes[searchX][searchY])
-
 		return listOfNodes

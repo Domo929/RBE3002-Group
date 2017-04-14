@@ -8,8 +8,8 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import PoseStamped
 from tf.transformations import euler_from_quaternion
 
-wheel_rad = 3.5 / 100.0 #cm
-wheel_base = 23.0 / 100.0 #cm
+wheel_rad = 3.5 / 100.0 
+wheel_base = 23.0 / 100.0 
 
 def sendMoveMsg(linearVelocity, angularVelocity):
     """Send a movement (twist) message."""
