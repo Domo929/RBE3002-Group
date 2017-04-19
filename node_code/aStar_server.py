@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-import rospy, tf, math, time
-from geometry_msgs.msg import Twist
-from nav_msgs.msg import GridCells, Path
+import rospy
+from nav_msgs.msg import Path
 from Node import Node
-from geometry_msgs.msg import Point, PoseStamped, PoseWithCovarianceStamped
+from geometry_msgs.msg import Point, PoseStamped
 
 def aStarPathFinding(start, goal):
 	if(start.state==-1):
@@ -84,11 +83,7 @@ def convertToGridScaling(arr):
 		arr[i].y=arr[i].y*resolution + 0.2
 	return arr
 def returnPathWaypoints(start, end):
-	#NEED TO ADD
-		#Resolution
-
 	pathReturned = aStarPathFinding(start,end)
-
 	listOfWaypoints = []
 	for x in range(1, len(pathReturned)-1):  
 		currentNode = pathReturned[x]
@@ -118,14 +113,8 @@ def returnPathWaypoints(start, end):
 	waypointsToPublish.poses = listOfWaypoints
 	print("Finished Getting Waypoints")
 	return listOfWaypoints
-
-
 def handle_aStar(req):
-	startPoint=req.start
-	endPoint=req.end
-	shortestPath=returnPathWaypoints(startPoint,endPoint)
-
-	return aStarResponse()
+	return aStarResponse(returnPathWaypoints(req.start,req.end))
 def aStar_server():
 	rospy.init_node('aStar_server')
 	s = rospy.Service('aStar', aStarCompute, handle_aStar)
