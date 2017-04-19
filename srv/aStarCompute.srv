@@ -1,6 +1,4 @@
-int32[] start
-int32[] end
-int32[] mapOG
+Pose start
+Pose end
 ---
-int32[] xPath
-int32[] yPath
+Path shortestPath

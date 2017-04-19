@@ -85,14 +85,12 @@ def returnPathWaypoints(self, start, end, inputMap, resolution):
 	self.nodes = inputMap
 	path=[]
 	pathReturned = self.aStarPathFinding(start,end)
-
 #create gridcell output for path
 	pathCell = GridCells()
 	pathCell.header.frame_id = "map"
 	pathCell.cell_width =resolution
 	pathCell.cell_height=resolution
 	pathCell.cells = self.convertToGridScaling(pathReturned,resolution)
-
 #create list of waypoints
 	listOfWaypoints = []
 	for x in range(1, len(pathReturned)-1):  
@@ -115,5 +113,22 @@ def returnPathWaypoints(self, start, end, inputMap, resolution):
 			tempPose.pose.orientation.w = quaternion[3]
 			listOfWaypoints.append(tempPose)
 	print("After For Loop")
+
+def handle_aStar(req):
+	start=req.start
+	end=req.end
+	return aStarResponse()
+	
+def aStar_server():
+	rospy.init_node('aStar_server')
+	s = rospy.Service('aStar', aStarCompute, handle_aStar)
+	rospy.spin()
+
+if __name__ == "__main__":
+	subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=10)
+	aStar_server()
+
+
+
 
 #SETUP SERVICE
