@@ -5,7 +5,8 @@ from nav_msgs.msg import GridCells, Path
 from Node import Node
 from geometry_msgs.msg import Point, PoseStamped, PoseWithCovarianceStamped
 
-class aStar:
+class frontierFinder:
+	
 	def findFrontierRegionCentriods(self,map,threshold):
 		frontierRegions = findFrontierRegions(map,threshold) #returns a list of lists of points
 		centriods = []
