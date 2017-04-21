@@ -50,9 +50,34 @@ if __name__ == "__main__":
 	#Subscriber(s)
 	map_sub        = rospy.Subscriber('/map', OccupancyGrid, readOccGrid, queue_size=10)
 
-	#Wait to make sure we don't attempt to iterate over empty items
-	while not haveFirstMap:
-		pass
+	#Gross stuff to make sure it doesn't shit the bed if it hasnt recieved a message yet
+	try:
+		width
+	except NameError:
+		width = 0
+	else:
+		width = width
+
+	try:
+		height
+	except NameError:
+		height = 0
+	else:
+		height = height
+
+	try:
+		index
+	except NameError:
+		index = []
+	else:
+		index = index
+
+	try:
+		resolution
+	except NameError:
+		resolution = 1
+	else:
+		resolution = resolution
 
 	#Do this till we tell you to shove it
 	while not rospy.is_shutdown():
