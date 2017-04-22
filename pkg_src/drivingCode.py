@@ -219,9 +219,9 @@ def updateWaypoints(msg):
             newPath = True
 
 # This is the program's main function
-if __name__ == '__main__':
-    rospy.init_node('Driving_Node')
-#def initDrivingCode():
+#if __name__ == '__main__':
+#    rospy.init_node('Driving_Node')
+def initDrivingCode():
     global pub
     global pose
     global currentPose
@@ -243,9 +243,9 @@ if __name__ == '__main__':
 
     rospy.sleep(rospy.Duration(1))
 
-    rospy.Timer(rospy.Duration(.2), navToPose)
+    #rospy.Timer(rospy.Duration(.2), navToPose)
 
-    while not rospy.is_shutdown():
-        location_Pub.publish(currentPose.pose.position)
+    # while not rospy.is_shutdown():
+    #     location_Pub.publish(currentPose.pose.position)
 
     print "Lab 2 complete!"

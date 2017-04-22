@@ -2,6 +2,11 @@
 
 import rospy, tf, numpy, math
 import actionlib
+from nav_msgs.msg import OccupancyGrid
+from move_base_msgs.msg import *
+from nav_msgs.msg import Odometry
+from findingFrontiers import FindFrontiers
+from geometry_msgs.msg import Twist, Point
 
 def readOdom(msg):
     """Read odometry messages and store into global variables."""
@@ -10,6 +15,7 @@ def readOdom(msg):
     global theta
     global odom_list
     global odom_tf
+    global pose
     try:
         currentPose = msg.pose
         pose = msg.pose
@@ -47,40 +53,99 @@ def sendGoal(centriod):
 	ac.wait_for_result() # this probably wont work. It is going to have to be switched to use
 	return ac.get_state() # feedback insead of result. 
 
+# def rotate(angle):
+#     global pose
+#     global newPath
+#     Kp = 5
+
+#     quaternion = (  #add values into quaternion in order to convert
+#     pose.pose.orientation.x,
+#     pose.pose.orientation.y,
+#     pose.pose.orientation.z,
+#     pose.pose.orientation.w)
+#     euler = tf.transformations.euler_from_quaternion(quaternion)
+#     yaw = euler[2] + 3.14
+
+#     twist = Twist() #all values default to 0
+#     initOrien = yaw
+#     currentPose = yaw
+
+#     amountToTurn = yaw + angle
+
+#     amountToTurn = amountToTurn%6.28
+
+#     if(angle>0):
+#         setSpeed= 0.4
+#     else:
+#         setSpeed=-0.4
+
+#     while(abs(amountToTurn - yaw) > .005 and not rospy.is_shutdown() and not newPath):
+#         pub.publish(twist)
+#         if(abs(setSpeed * (amountToTurn - yaw) *Kp) > abs(setSpeed)):
+#             twist.angular.z = setSpeed
+#         else:
+#             twist.angular.z = setSpeed * abs(amountToTurn - yaw) *Kp
+
+#         currentPose = yaw
+#         quaternion = (  #add values into quaternion in order to convert
+#         pose.pose.orientation.x,
+#         pose.pose.orientation.y,
+#         pose.pose.orientation.z,
+#         pose.pose.orientation.w)
+#         euler = tf.transformations.euler_from_quaternion(quaternion)
+#         yaw = euler[2] + 3.14
+#         #print yaw
+
+#     stop = Twist()#all values default to 0 so this msg will stop the robot
+#     pub.publish(stop)
+
+def rotateDegrees(angle):
+    """Rotate and angle in degrees."""
+    rotate(angle * (math.pi / 180))
+
 if __name__ == '__main__':
 	global map
 	global hasMap 
 	global odom_list
-    global odom_tf
-    global xPosition
-    global yPosition
-    global ac
+	global odom_tf
+	global xPosition
+	global yPosition
+	global ac
+	global pose
+	global pub 
 
+	rospy.init_node('Exploration')
+	
+	threshold = 1
 	hasMap= False
 	listOfFrontierCentriods = []
 	frontierFunctions = FindFrontiers()
-	sub = rospy.Subscriber('/odom', Odometry, readOdom)
-    odom_list = tf.TransformListener()
-    odom_tf = tf.TransformBroadcaster()
-    odom_tf.sendTransform((0, 0, 0),(0, 0, 0, 1),rospy.Time.now(),"base_footprint","odom")
-    ac = actionlib.SimpleActionClient('move_base',MoveBaseAction)
-
-	rospy.init_node('Exploration')
+	#sub = rospy.Subscriber('/odom', Odometry, readOdom)
+	#odom_list = tf.TransformListener()
+	#odom_tf = tf.TransformBroadcaster()
+	#odom_tf.sendTransform((0, 0, 0),(0, 0, 0, 1),rospy.Time.now(),"base_footprint","odom")
+	ac = actionlib.SimpleActionClient('move_base',MoveBaseAction)
+	
 	print "Begining Exploration"
-	
 	subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=3)
+	#sub = rospy.Subscriber('/odom', Odometry, readOdom)
+	#pub = rospy.Publisher('cmd_vel_mux/input/teleop', Twist, None, queue_size=10) # Publisher for commanding robot motion
     
-    ac.wait_for_server()
+	ac.wait_for_server()
+	print "Service setup successful"
 
-	rotateDegrees(360) #rotate in place to create inital map
-	
-	while(not(hasMap)): #wait to recieve inital map
+	#rotateDegrees(360) #rotate in place to create inital map
+	print "inital rotate complete"
+
+	while(not(hasMap) and not(rospy.is_shutdown())): #wait to recieve inital map
+		rospy.sleep(rospy.Duration(1))
 		print "Waiting for map"
 
 	rospy.sleep(rospy.Duration(2))
-	listOfFronierCentriods = findFrontierRegionCentriods(map,threshold)
-
-	while(len(listOfFrontierCentriods) > 0): #while there is a frontier
+	print "Map recieved"
+	listOfFronierCentriods = frontierFunctions.findFrontierRegionCentriods(map,threshold)
+	print "Centriods Found"
+	while(len(listOfFrontierCentriods) > 0 and not(rospy.is_shutdown())): #while there is a frontier
 		#find closest frontier centriiods
 		minDistance = -1
 		for centriod in listOfFrontierCentriods:
@@ -90,7 +155,6 @@ if __name__ == '__main__':
 				minCentriod = centriod
 
 		sendGoal(centriod) #sends goal and doesn't proceed until the robot is at the goal position
-		rotateDegrees(360)
 		rospy.sleep(rospy.Duration(2))
 		listOfFronierCentriods = findFrontierRegionCentriods(map,threshold)
 
