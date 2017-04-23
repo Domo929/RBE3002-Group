@@ -9,7 +9,8 @@ class navToServer:
 		self.server = actionlib.SimpleActionServer('move_base', MoveBaseAction, self.execute, False)
 		self.server.start()
 	def execute(self,goal):
-		goal_sub = rospy.Publisher('move_base_simple/goal', PoseStamped, goal, queue_size=100)
+		goal_pub = rospy.Publisher('move_base_simple/goal', PoseStamped, None, queue_size=100)
+		goal_pub.publish(goal)
 		self.server.set_succeeded()
 
 
