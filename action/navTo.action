@@ -1,5 +1,5 @@
-PoseStamped goalPose
+geometry_msgs/PoseStamped goalPose
 ---
-Pose currentPose
+geometry_msgs/PoseStamped currentPose
 ---
-Pose finalPose
+geometry_msgs/PoseStamped finalPose

@@ -2,6 +2,9 @@
 
 
 '''Aren't currently broadcasting tf'''
+'''Goal needs to be PoseStamped when sent to actionServer'''
+'''Feedback provides server implementers a way to tell an ActionClient about the incremental progress of a goal. For moving the base, this might be the robot's current pose along the path.'''
+'''For move base, the result isn't very important, but it might contain the final pose of the robot'''
 
 
 
@@ -49,7 +52,7 @@ def sendGoal(centriod):
 	
 	ac.wait_for_server()
 	ac.send_goal(goal)
-	ac.wait_for_result() # this probably wont work. It is going to have to be switched to use
+	ac.wait_for_result(rospy.Duration.from_sec(5.0)) # this probably wont work. It is going to have to be switched to use
 	return ac.get_state() # feedback insead of result. 
 
 if __name__ == '__main__':
@@ -83,7 +86,7 @@ if __name__ == '__main__':
 	print "Map recieved"
 	listOfFronierCentriods = frontierFunctions.findFrontierRegionCentriods(mapOG,threshold)
 	print "Centriods Found"
-	
+
 	while(len(listOfFrontierCentriods) > 0 and not(rospy.is_shutdown())): #while there is a frontier
 		#find closest frontier centriiods
 		minDistance = -1
