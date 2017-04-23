@@ -10,9 +10,9 @@ class FindFrontiers:
 	def __init__(self):
 		self = self
 
-	def findFrontierRegionCentriods(self,map,threshold):
+	def findFrontierRegionCentriods(self,mapOG,threshold):
 		print "Find Region Centriods started"
-		frontierRegions = self.findFrontierRegions(map,threshold) #returns a list of lists of points
+		frontierRegions = self.findFrontierRegions(mapOG,threshold) #returns a list of lists of points
 		print "Frontier regions found"
 		centriods = []
 
@@ -32,11 +32,9 @@ class FindFrontiers:
 			centriods.append(centriod)
 
 		return centriods
-
-	def findFrontierRegions(self,map,threshold):
+	def findFrontierRegions(self,mapOG,threshold):
 		frontierRegions = []
-		
-		listOfFrontiers = self.findFrontiers(map)
+		listOfFrontiers = self.findFrontiers(mapOG)
 		print "list of frontier points found"
 		frontierRegions.append([listOfFrontiers.pop()]) #start the first region with the first frontier point
 
@@ -64,15 +62,11 @@ class FindFrontiers:
 				frontierRegions.remove(region)
 
 		return frontierRegions
-
-	
 	def findFrontiers(self, map):
 		height = map.info.height
 		width = map.info.width
 		data = map.data
-
 		listOfFrontiers = []
-		point = Point()
 
 		#the logic here is that any known open cell adjacent
 		#to an unknown cell must be a frontier
@@ -88,21 +82,19 @@ class FindFrontiers:
 						listOfFrontiers.append(point)
 
 		return listOfFrontiers
-
-
 	def isAdjacentToOpen(self,x,y,data,width):
-		for yAdd in range(-1,1):
-			for xAdd in range(-1,1):
+		for yAdd in range(-1,2):
+			for xAdd in range(-1,2):
 				xCheck = x+xAdd
 				yCheck = y+yAdd
+
 
 				if(data[xCheck+yCheck*(width)]==-1 and not(xAdd == 0 and yAdd==0)):
 					return True
 		return False
-
 	def isAdjacent(self,existingPoint,frontierPoint):
-		for yAdd in range(-1,1):
-			for xAdd in range(-1,1):
+		for yAdd in range(-1,2):
+			for xAdd in range(-1,2):
 				xCheck = existingPoint.x+xAdd
 				yCheck = existingPoint.y+yAdd
 
