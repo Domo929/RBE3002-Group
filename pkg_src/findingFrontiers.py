@@ -25,7 +25,7 @@ class FindFrontiers:
 				tempSumX += point.x
 				tempSumY += point.y
 
-			centiord = Point()
+			centriod = Point()
 
 			centriod.y = int(tempSumY/float(len(region))) # find average of x and y
 			centriod.x = int(tempSumX/float(len(region))) # set this as the centriod and add to the list
@@ -44,9 +44,12 @@ class FindFrontiers:
 			print ("in for loop 2",len(listOfFrontiers))
 			#rospy.sleep(rospy.Duration(3))
 			frontierPoint = listOfFrontiers.pop()
+			hasBeenAdded=False
 			itterater = 0
 			for region in frontierRegions:
 				#print "in for loop 3"
+				if(hasBeenAdded):
+					break
 				for existingPoint in region:
 					#print "in for loop 4"
 					if(existingPoint.x== frontierPoint.x and existingPoint.y == frontierPoint.y):
@@ -56,6 +59,8 @@ class FindFrontiers:
 							frontierRegions[itterater].append(frontierPoint) #to that regions list of points
 						else:
 							frontierRegions.append([frontierPoint])  #if not then create a new region
+						hasBeenAdded=True
+						break
 				itterater +=1
  
  		for region in frontierRegions: #remove any regions that are smaller than the width of the robot
@@ -68,7 +73,7 @@ class FindFrontiers:
 		width = map.info.width
 		data = map.data
 		listOfFrontiers = []
-
+		mapOfFrontiers = []
 		#the logic here is that any known open cell adjacent
 		#to an unknown cell must be a frontier
 		for y in range(height):

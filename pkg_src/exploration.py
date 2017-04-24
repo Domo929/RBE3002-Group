@@ -16,6 +16,7 @@ from move_base_msgs.msg import *
 from nav_msgs.msg import Odometry
 from findingFrontiers import FindFrontiers
 from geometry_msgs.msg import Twist, Point
+from tf.transformations import euler_from_quaternion
 
 def readOdom(msg):
     """Read odometry messages and store into global variables."""
@@ -26,17 +27,18 @@ def readOdom(msg):
     global odom_tf
     global pose
     try:
-        pose = msg.pose
-        odom_tf.sendTransform((pose.pose.position.x, pose.pose.position.y, 0), 
-                (pose.pose.orientation.x, pose.pose.orientation.y,pose.pose.orientation.z,pose.pose.orientation.w),rospy.Time.now(),"base_footprint","odom")
-        (trans, rot) = odom_list.lookupTransform('map', 'base_footprint', rospy.Time(0))
-        roll, pitch, yaw = euler_from_quaternion(rot)
-        theta = yaw * (180.0/math.pi)
-        xPosition = trans[0]
-        yPosition = trans[1]
+	    pose = msg.pose
+	    odom_tf.sendTransform((pose.pose.position.x, pose.pose.position.y, 0), 
+	            (pose.pose.orientation.x, pose.pose.orientation.y,pose.pose.orientation.z,pose.pose.orientation.w),rospy.Time.now(),"base_footprint","odom")
+	    (trans, rot) = odom_list.lookupTransform('map', 'base_footprint', rospy.Time(0))
+	    roll, pitch, yaw = euler_from_quaternion(rot)
+	    theta = yaw * (180.0/math.pi)
+	    xPosition = trans[0]
+	    yPosition = trans[1]
 
     except:
         print "drivingCode waiting for tf..."
+
 def saveMap(msg):
 	global mapOG 
 	global hasMap
@@ -47,12 +49,15 @@ def sendGoal(centriod):
 	global ac
 	goal = MoveBaseGoal()
 
+	goal.target_pose.header.frame_id='map'
 	goal.target_pose.pose.position.x=centriod.x
 	goal.target_pose.pose.position.y=centriod.y
+	goal.target_pose.pose.orientation.w = 1
+
 	
 	ac.wait_for_server()
 	ac.send_goal(goal)
-	ac.wait_for_result(rospy.Duration.from_sec(5.0)) # this probably wont work. It is going to have to be switched to use
+	ac.wait_for_result() # this probably wont work. It is going to have to be switched to use
 	return ac.get_state() # feedback insead of result. 
 
 if __name__ == '__main__':
@@ -73,31 +78,39 @@ if __name__ == '__main__':
 	listOfFrontierCentriods = []
 	frontierFunctions = FindFrontiers()
 	ac = actionlib.SimpleActionClient('move_base',MoveBaseAction)
-	
+	sub = rospy.Subscriber('/odom', Odometry, readOdom)
+	odom_list = tf.TransformListener()
+	odom_tf = tf.TransformBroadcaster()
+	odom_tf.sendTransform((0, 0, 0),(0, 0, 0, 1),rospy.Time.now(),"base_footprint","odom")
+	rospy.sleep(rospy.Duration(2))
+
 	print "Begining Exploration"
 	subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=3)
-	#ac.wait_for_server()
-	#print "Service setup successful"
+	ac.wait_for_server()
+	print "Service setup successful"
 
 	while(not(hasMap) and not(rospy.is_shutdown())): #wait to recieve inital map
 		rospy.sleep(rospy.Duration(1))
 		print "Waiting for map"
 
 	print "Map recieved"
-	listOfFronierCentriods = frontierFunctions.findFrontierRegionCentriods(mapOG,threshold)
+	listOfFrontierCentroids = frontierFunctions.findFrontierRegionCentriods(mapOG,threshold)
 	print "Centriods Found"
+	print ("length",len(listOfFrontierCentroids) )
+	print listOfFrontierCentroids
 
-	while(len(listOfFrontierCentriods) > 0 and not(rospy.is_shutdown())): #while there is a frontier
+	while(len(listOfFrontierCentroids) > 0 and not(rospy.is_shutdown())): #while there is a frontier
 		#find closest frontier centriiods
+		print ("length",len(listOfFrontierCentroids) )
 		minDistance = -1
-		for centriod in listOfFrontierCentriods:
-			tempDistance = sqrt((centriod.x-xPosition)**2+(centriod.y-yPosition)**2)
+		for centroid in listOfFrontierCentroids:
+			tempDistance = math.sqrt((centroid.x-xPosition)**2+(centroid.y-yPosition)**2)
 			if(tempDistance < minDistance or minDistance == -1):
 				minDistance = tempDistance
-				minCentriod = centriod
+				minCentriod = centroid
 
-		sendGoal(centriod) #sends goal and doesn't proceed until the robot is at the goal position
+		print sendGoal(centroid) #sends goal and doesn't proceed until the robot is at the goal position
 		rospy.sleep(rospy.Duration(2))
-		listOfFronierCentriods = findFrontierRegionCentriods(mapOG,threshold)
+		listOfFrontierCentroids = frontierFunctions.findFrontierRegionCentriods(mapOG,threshold)
 
 	print "Area has been fully explored"
