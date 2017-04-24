@@ -33,6 +33,7 @@ class FindFrontiers:
 
 		return centriods
 	def findFrontierRegions(self,mapOG,threshold):
+		print "Finding Frontier Regions"
 		frontierRegions = []
 		listOfFrontiers = self.findFrontiers(mapOG)
 		print "list of frontier points found"
@@ -57,7 +58,7 @@ class FindFrontiers:
 							frontierRegions.append([frontierPoint])  #if not then create a new region
 				itterater +=1
  
-		for region in frontierRegions: #remove any regions that are smaller than the width of the robot
+ 		for region in frontierRegions: #remove any regions that are smaller than the width of the robot
 			if(len(region)<threshold): #because they are insignifanct and do not need to be explored
 				frontierRegions.remove(region)
 
@@ -73,7 +74,7 @@ class FindFrontiers:
 		for y in range(height):
 			for x in range(width):
 				currentDataPoint = data[x+y*(width)]
-				if(currentDataPoint < 50):
+				if(currentDataPoint < 50 and not(currentDataPoint==-1)):
 					if(self.isAdjacentToOpen(x,y,data,width)):
 						point = Point()
 						point.x = x

@@ -57,14 +57,14 @@ def sendGoal(centriod):
 
 if __name__ == '__main__':
 	global mapOG
-	global hasMap 
+	global hasMap
 	global odom_list
 	global odom_tf
 	global xPosition
 	global yPosition
 	global ac
 	global pose
-	global pub 
+	global pub
 
 	rospy.init_node('Exploration')
 	
@@ -76,8 +76,8 @@ if __name__ == '__main__':
 	
 	print "Begining Exploration"
 	subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=3)
-	ac.wait_for_server()
-	print "Service setup successful"
+	#ac.wait_for_server()
+	#print "Service setup successful"
 
 	while(not(hasMap) and not(rospy.is_shutdown())): #wait to recieve inital map
 		rospy.sleep(rospy.Duration(1))
