@@ -95,9 +95,9 @@ class FindFrontiers:
 		pathCell.cell_height=mapOG.info.resolution
 		pathCell.cells = self.convertToGridScaling(listOfFrontiers,mapOG.info.resolution)
 
-		while(not(rospy.is_shutdown())):
-			print "publishing"
-			pubFrontier.publish(pathCell)
+		# while(not(rospy.is_shutdown())):
+		# 	print "publishing"
+		# 	pubFrontier.publish(pathCell)
 
 		return listOfFrontiers
 	def isAdjacentToOpen(self,x,y,data,width):
