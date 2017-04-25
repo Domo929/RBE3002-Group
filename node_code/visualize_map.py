@@ -2,7 +2,8 @@
 
 #The messages we use, and the rospy import
 import rospy
-from nav_msgs.msg import OccupancyGrid, GridCells
+from nav_msgs.msg import OccupancyGrid
+from nav_msgs.msg import GridCells
 from geometry_msgs.msg import Point	
 
 
@@ -27,6 +28,15 @@ def readOccGrid(msg):
 	height = msg.info.height
 	resolution = msg.info.resolution
 	index = msg.data
+
+def makeGridCells(label, cell_dim, cells):
+	gc = GridCells()
+	gc.header.frame_id = label
+	gc.cell_width = cell_dim
+	gc.cell_height = cell_dim
+	gc.cells = cells
+
+	return gc
 
 
 if __name__ == "__main__":
@@ -113,35 +123,12 @@ if __name__ == "__main__":
 					path_list.append(Point(resolution*x, resolution*y, 0))
 
 		#Creates each Gridcells object to publish
-		frontierGC = GridCells()
-		frontierGC.header.frame_id = 'Frontier'
-		frontierGC.cell_width = resolution
-		frontierGC.cell_height = resolution
-		frontierGC.cells = frontier_list
+		frontierGC   = makeGridCells('Frontier',   resolution, frontier_list)
+		exploredGC   = makeGridCells('Explored',   resolution, explored_list)
+		unexploredGC = makeGridCells('Unexplored', resolution, unexplored_list)
+		obstaclesGC  = makeGridCells('Obstacles',  resolution, obstacles_list)
+		pathGC       = makeGridCells('Path',       resolution, path_list)
 
-		exploredGC = GridCells()
-		exploredGC.header.frame_id = 'Explored'
-		exploredGC.cell_width = resolution
-		exploredGC.cell_height = resolution
-		exploredGC.cells = explored_list
-
-		unexploredGC = GridCells()
-		unexploredGC.header.frame_id = 'Unexplored'
-		unexploredGC.cell_width = resolution
-		unexploredGC.cell_height = resolution
-		unexploredGC.cells = unexplored_list
-
-		obstaclesGC = GridCells()
-		obstaclesGC.header.frame_id = 'Obstacles'
-		obstaclesGC.cell_width = resolution
-		obstaclesGC.cell_height = resolution
-		obstaclesGC.cells = obstacles_list
-
-		pathGC = GridCells()
-		pathGC.header.frame_id = 'Shortest_Path'
-		pathGC.cell_width = resolution
-		pathGC.cell_height = resolution
-		pathGC.cells = path_list
 
 		#Publishes the GridCells Objects
 		frontier_pub.publish(frontierGC)
