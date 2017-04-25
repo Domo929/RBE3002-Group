@@ -68,10 +68,10 @@ class FindFrontiers:
 				frontierRegions.remove(region)
 
 		return frontierRegions
-	def findFrontiers(self, map):
-		height = map.info.height
-		width = map.info.width
-		data = map.data
+	def findFrontiers(self, mapOG):
+		height = mapOG.info.height
+		width = mapOG.info.width
+		data = mapOG.data
 		listOfFrontiers = []
 		mapOfFrontiers = []
 		pubFrontier = rospy.Publisher('/mapData/Frontier',GridCells,queue_size=10)
@@ -92,9 +92,9 @@ class FindFrontiers:
 
 		pathCell = GridCells()
 		pathCell.header.frame_id = "map"
-		pathCell.cell_width =0.05
-		pathCell.cell_height=0.05
-		pathCell.cells = self.convertToGridScaling(listOfFrontiers,0.05)
+		pathCell.cell_width =mapOG.info.resolution
+		pathCell.cell_height=mapOG.info.resolution
+		pathCell.cells = self.convertToGridScaling(listOfFrontiers,mapOG.info.resolution)
 
 		while(not(rospy.is_shutdown())):
 			print "publishing"
@@ -124,6 +124,6 @@ class FindFrontiers:
 	def convertToGridScaling(self,arr,resolution):
 
 	    for i in range(0, len(arr)):
-	        arr[i].x=arr[i].x*resolution -12.5
-	        arr[i].y=arr[i].y*resolution -12.5
+	        arr[i].x=arr[i].x*resolution-12.26
+	        arr[i].y=arr[i].y*resolution-13.87
 	    return arr
