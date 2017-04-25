@@ -74,6 +74,9 @@ class FindFrontiers:
 		data = map.data
 		listOfFrontiers = []
 		mapOfFrontiers = []
+		pubFrontier = rospy.Publisher('/mapData/Frontier',GridCells,queue_size=10)
+		
+		#pathCell.cells = self.convertToGridScaling(pathReturned,resolution)
 		#the logic here is that any known open cell adjacent
 		#to an unknown cell must be a frontier
 		for y in range(height):
@@ -86,6 +89,16 @@ class FindFrontiers:
 						point.y = y
 
 						listOfFrontiers.append(point)
+
+		pathCell = GridCells()
+		pathCell.header.frame_id = "map"
+		pathCell.cell_width =0.05
+		pathCell.cell_height=0.05
+		pathCell.cells = self.convertToGridScaling(listOfFrontiers,0.05)
+
+		while(not(rospy.is_shutdown())):
+			print "publishing"
+			pubFrontier.publish(pathCell)
 
 		return listOfFrontiers
 	def isAdjacentToOpen(self,x,y,data,width):
@@ -107,3 +120,10 @@ class FindFrontiers:
 				if(xCheck == frontierPoint.x and yCheck == frontierPoint.y and not(xAdd == 0 and yAdd == 0)):
 					return True
 		return False
+
+	def convertToGridScaling(self,arr,resolution):
+
+	    for i in range(0, len(arr)):
+	        arr[i].x=arr[i].x*resolution -12.5
+	        arr[i].y=arr[i].y*resolution -12.5
+	    return arr

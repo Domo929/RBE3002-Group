@@ -85,7 +85,7 @@ if __name__ == '__main__':
 	rospy.sleep(rospy.Duration(2))
 
 	print "Begining Exploration"
-	subMap = rospy.Subscriber('/map',OccupancyGrid,saveMap,queue_size=3)
+	subMap = rospy.Subscriber('/move_base/global_costmap/costmap',OccupancyGrid,saveMap,queue_size=3)
 	ac.wait_for_server()
 	print "Service setup successful"
 
