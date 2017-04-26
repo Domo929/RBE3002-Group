@@ -83,7 +83,7 @@ class FindFrontiers:
 		regionCell.header.frame_id = "map"
 		regionCell.cell_width = mapOG.info.resolution
 		regionCell.cell_height= mapOG.info.resolution
-		regionCell.cells = frontierRegions[4]
+		regionCell.cells = frontierRegions[0]
 		print("Frontier #: ", len(regionPoints))
 		print("Region #: ", len(frontierRegions))
 		print "publishing: Regions"

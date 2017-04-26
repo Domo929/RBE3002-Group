@@ -28,8 +28,8 @@ def readOdom(msg):
     global pose
     try:
 	    pose = msg.pose
-	    odom_tf.sendTransform((pose.pose.position.x, pose.pose.position.y, 0), 
-	            (pose.pose.orientation.x, pose.pose.orientation.y,pose.pose.orientation.z,pose.pose.orientation.w),rospy.Time.now(),"base_footprint","odom")
+	    # odom_tf.sendTransform((pose.pose.position.x, pose.pose.position.y, 0), 
+	    #         (pose.pose.orientation.x, pose.pose.orientation.y,pose.pose.orientation.z,pose.pose.orientation.w),rospy.Time.now(),"base_footprint","odom")
 	    (trans, rot) = odom_list.lookupTransform('map', 'base_footprint', rospy.Time(0))
 	    roll, pitch, yaw = euler_from_quaternion(rot)
 	    theta = yaw * (180.0/math.pi)
@@ -83,8 +83,8 @@ if __name__ == '__main__':
 	ac = actionlib.SimpleActionClient('move_base',MoveBaseAction)
 	sub = rospy.Subscriber('/odom', Odometry, readOdom)
 	odom_list = tf.TransformListener()
-	odom_tf = tf.TransformBroadcaster()
-	odom_tf.sendTransform((0, 0, 0),(0, 0, 0, 1),rospy.Time.now(),"base_footprint","odom")
+	# odom_tf = tf.TransformBroadcaster()
+	# odom_tf.sendTransform((0, 0, 0),(0, 0, 0, 1),rospy.Time.now(),"base_footprint","odom")
 	rospy.sleep(rospy.Duration(2))
 
 	print "Begining Exploration"
