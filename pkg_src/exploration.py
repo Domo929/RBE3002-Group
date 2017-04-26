@@ -52,12 +52,15 @@ def sendGoal(centriod):
 	goal.target_pose.header.frame_id='map'
 	goal.target_pose.pose.position.x=centriod.x
 	goal.target_pose.pose.position.y=centriod.y
-	goal.target_pose.pose.orientation.w = 1
+	goal.target_pose.pose.orientation.w = 1.0
 
 	
 	ac.wait_for_server()
+	print goal
 	ac.send_goal(goal)
 	ac.wait_for_result() # this probably wont work. It is going to have to be switched to use
+	while(not rospy.is_shutdown()):
+		pass
 	return ac.get_state() # feedback insead of result. 
 
 if __name__ == '__main__':

@@ -13,6 +13,7 @@ class FindFrontiers:
 	def findFrontierRegionCentriods(self,mapOG,threshold):
 		print "Find Region Centriods started"
 		frontierRegions = self.findFrontierRegions(mapOG,threshold) #returns a list of lists of points
+		pubCents = rospy.Publisher('/mapData/Cents',GridCells,queue_size=10)
 		print "Frontier regions found"
 		centriods = []
 
@@ -27,9 +28,19 @@ class FindFrontiers:
 
 			centriod = Point()
 
-			centriod.y = int(tempSumY/float(len(region))) # find average of x and y
-			centriod.x = int(tempSumX/float(len(region))) # set this as the centriod and add to the list
+			centriod.y = tempSumY/float(len(region)) # find average of x and y
+			centriod.x = tempSumX/float(len(region)) # set this as the centriod and add to the list
 			centriods.append(centriod)
+
+		centsCell = GridCells()
+		centsCell.header.frame_id = "map"
+		centsCell.cell_width = mapOG.info.resolution
+		centsCell.cell_height= mapOG.info.resolution
+		centsCell.cells = centriods
+		print "Publish Centeriods"
+		#while(not rospy.is_shutdown()):
+		pubCents.publish(centsCell)
+
 
 		return centriods
 	def findFrontierRegions(self,mapOG,threshold):
@@ -51,33 +62,34 @@ class FindFrontiers:
 			ii = 0
 			for region in frontierRegions:
 				#print "in for loop 3"
-				if(hasBeenAdded):
-					break
+				# if(hasBeenAdded):
+				# 	break
 				for existingPoint in region:
-					regionPoints.append(existingPoint)
+					
 					#print "in for loop 4"
-					if(not(existingPoint.x == frontierPoint.x and existingPoint.y == frontierPoint.y)):
-						if(self.isAdjacent(existingPoint,frontierPoint)): #if the point is adjacent to any other points add it
-							print("Is Adjacent")
-							frontierRegions[ii].append(frontierPoint) #to that regions list of points
-						else:
-							frontierRegions.append([frontierPoint])  #if not then create a new region
-						hasBeenAdded=True
-						break
-						
+					#if(not(existingPoint.x == frontierPoint.x and existingPoint.y == frontierPoint.y)):
+					if(self.isAdjacent(existingPoint,frontierPoint) and not(hasBeenAdded)): #if the point is adjacent to any other points add it
+						frontierRegions[ii].append(frontierPoint) #to that regions list of points
+						hasBeenAdded=True	
+
 				ii +=1
+
+			if(not(hasBeenAdded)): 
+				print "New Region Added"
+				frontierRegions.append([frontierPoint])  #if not then create a new region
 
 
 		regionCell = GridCells()
 		regionCell.header.frame_id = "map"
-		regionCell.cell_width =mapOG.info.resolution
-		regionCell.cell_height=mapOG.info.resolution
-		regionCell.cells = self.convertGridToWorld(regionPoints,mapOG.info.resolution, mapOG.info.origin)
+		regionCell.cell_width = mapOG.info.resolution
+		regionCell.cell_height= mapOG.info.resolution
+		regionCell.cells = frontierRegions[4]
 		print("Frontier #: ", len(regionPoints))
-		print("Region #: ", len(frontierRegions[0]))
+		print("Region #: ", len(frontierRegions))
 		print "publishing: Regions"
-		while(1):
-			pubRegions.publish(regionCell)
+		print regionCell.cells
+		#while(not(rospy.is_shutdown())):
+		pubRegions.publish(regionCell)
 
  
  		for region in frontierRegions: #remove any regions that are smaller than the width of the robot
@@ -124,14 +136,15 @@ class FindFrontiers:
 				if(data[xCheck+yCheck*(width)]==-1 and not(xAdd == 0 and yAdd==0)):
 					return True
 		return False
-	def isAdjacent(self,existingPoint,frontierPoint):
-		for yAdd in range(-1,2):
-			for xAdd in range(-1,2):
-				xCheck = existingPoint.x+xAdd
-				yCheck = existingPoint.y+yAdd
-
-				if(xCheck == frontierPoint.x and yCheck == frontierPoint.y and not(xAdd == 0 and yAdd == 0)):
-					return True
+	def isAdjacent(self,point1,point2):
+		# for yAdd in range(-1,2):
+		# 	for xAdd in range(-1,2):
+		# 		# xCheck = point1.x+xAdd
+		# 		# yCheck = point1.y+yAdd
+		
+		if(math.sqrt((point1.x-point2.x)**2+(point1.y-point2.y)**2) < .1):
+			#print (math.sqrt((point1.x-point2.x)**2+(point1.y-point2.y)**2))
+			return True
 		return False
 	def convertGridToWorld(self,arr,resolution, origin):
 	    for i in range(0, len(arr)):
