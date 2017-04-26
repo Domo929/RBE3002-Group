@@ -97,11 +97,11 @@ if __name__ == '__main__':
 	listOfFrontierCentroids = frontierFunctions.findFrontierRegionCentriods(mapOG,threshold)
 	print "Centriods Found"
 	print ("length",len(listOfFrontierCentroids) )
-	print listOfFrontierCentroids
+	#print listOfFrontierCentroids
 
 	while(len(listOfFrontierCentroids) > 0 and not(rospy.is_shutdown())): #while there is a frontier
 		#find closest frontier centriiods
-		print ("length",len(listOfFrontierCentroids) )
+		#print ("length",len(listOfFrontierCentroids) )
 		minDistance = -1
 		for centroid in listOfFrontierCentroids:
 			tempDistance = math.sqrt((centroid.x-xPosition)**2+(centroid.y-yPosition)**2)
