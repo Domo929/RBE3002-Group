@@ -17,7 +17,7 @@ class FindFrontiers:
 		centriods = []
 
 		for region in frontierRegions:
-			print "in for loop"
+			#print "in for loop"
 			tempSumX = 0
 			tempSumY = 0
 
@@ -39,9 +39,12 @@ class FindFrontiers:
 		print "list of frontier points found"
 		frontierRegions.append([listOfFrontiers.pop()]) #start the first region with the first frontier point
 
+		pubRegions = rospy.Publisher('/mapData/Regions',GridCells,queue_size=10)
+		regionPoints=[]
+
 		#for counter in range(len(listOfFrontiers)):
 		while len(listOfFrontiers) > 0:
-			print ("in for loop 2",len(listOfFrontiers))
+			#print ("in for loop 2",len(listOfFrontiers))
 			#rospy.sleep(rospy.Duration(3))
 			frontierPoint = listOfFrontiers.pop()
 			hasBeenAdded=False
@@ -51,9 +54,11 @@ class FindFrontiers:
 				if(hasBeenAdded):
 					break
 				for existingPoint in region:
+					regionPoints.append(existingPoint)
 					#print "in for loop 4"
 					if(not(existingPoint.x == frontierPoint.x and existingPoint.y == frontierPoint.y)):
 						if(self.isAdjacent(existingPoint,frontierPoint)): #if the point is adjacent to any other points add it
+							print("Is Adjacent")
 							frontierRegions[ii].append(frontierPoint) #to that regions list of points
 						else:
 							frontierRegions.append([frontierPoint])  #if not then create a new region
@@ -61,6 +66,19 @@ class FindFrontiers:
 						break
 						
 				ii +=1
+
+
+		regionCell = GridCells()
+		regionCell.header.frame_id = "map"
+		regionCell.cell_width =mapOG.info.resolution
+		regionCell.cell_height=mapOG.info.resolution
+		regionCell.cells = self.convertGridToWorld(regionPoints,mapOG.info.resolution, mapOG.info.origin)
+		print("Frontier #: ", len(regionPoints))
+		print("Region #: ", len(frontierRegions[0]))
+		print "publishing: Regions"
+		while(1):
+			pubRegions.publish(regionCell)
+
  
  		for region in frontierRegions: #remove any regions that are smaller than the width of the robot
 			if(len(region)<threshold): #because they are insignifanct and do not need to be explored
