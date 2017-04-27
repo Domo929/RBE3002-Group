@@ -18,6 +18,51 @@ from findingFrontiers import FindFrontiers
 from geometry_msgs.msg import Twist, Point
 from tf.transformations import euler_from_quaternion
 
+def rotate(angle):
+    global pose
+    Kp = 5
+
+    quaternion = (  #add values into quaternion in order to convert
+    pose.pose.orientation.x,
+    pose.pose.orientation.y,
+    pose.pose.orientation.z,
+    pose.pose.orientation.w)
+    euler = tf.transformations.euler_from_quaternion(quaternion)
+    yaw = euler[2] + 3.14
+
+    twist = Twist() #all values default to 0
+    initOrien = yaw
+    currentPose = yaw
+
+    amountToTurn = yaw + angle
+
+    amountToTurn = amountToTurn%6.28
+
+    if(angle>0):
+        setSpeed= 0.5
+    else:
+        setSpeed=-0.5
+
+    while(abs(amountToTurn - yaw) > .1 and not rospy.is_shutdown()):
+        pub.publish(twist)
+        if(abs(setSpeed * (amountToTurn - yaw) *Kp) > abs(setSpeed)):
+            twist.angular.z = setSpeed
+        else:
+            twist.angular.z = setSpeed * abs(amountToTurn - yaw) *Kp
+
+        currentPose = yaw
+        quaternion = (  #add values into quaternion in order to convert
+        pose.pose.orientation.x,
+        pose.pose.orientation.y,
+        pose.pose.orientation.z,
+        pose.pose.orientation.w)
+        euler = tf.transformations.euler_from_quaternion(quaternion)
+        yaw = euler[2] + 3.14
+        #print yaw
+
+    stop = Twist()#all values default to 0 so this msg will stop the robot
+    pub.publish(stop)
+
 def readOdom(msg):
     """Read odometry messages and store into global variables."""
     global xPosition
@@ -49,6 +94,7 @@ def sendGoal(centriod):
 	global ac
 	goal = MoveBaseGoal()
 
+	goal.target_pose.header.stamp = rospy.get_rostime()
 	goal.target_pose.header.frame_id='map'
 	goal.target_pose.pose.position.x=centriod.x
 	goal.target_pose.pose.position.y=centriod.y
@@ -59,8 +105,6 @@ def sendGoal(centriod):
 	print goal
 	ac.send_goal(goal)
 	ac.wait_for_result() # this probably wont work. It is going to have to be switched to use
-	while(not rospy.is_shutdown()):
-		pass
 	return ac.get_state() # feedback insead of result. 
 
 if __name__ == '__main__':
@@ -82,10 +126,18 @@ if __name__ == '__main__':
 	frontierFunctions = FindFrontiers()
 	ac = actionlib.SimpleActionClient('move_base',MoveBaseAction)
 	sub = rospy.Subscriber('/odom', Odometry, readOdom)
+	pub = rospy.Publisher('cmd_vel_mux/input/teleop', Twist, None, queue_size=10) # Publisher for commanding robot motion
 	odom_list = tf.TransformListener()
-	# odom_tf = tf.TransformBroadcaster()
-	# odom_tf.sendTransform((0, 0, 0),(0, 0, 0, 1),rospy.Time.now(),"base_footprint","odom")
+
 	rospy.sleep(rospy.Duration(2))
+
+
+	print "Rotation sent to goal"
+	rotate(3.14)
+	print "Rotation 1 complete"
+	rotate(3.14)
+	print "Rotation Complete"
+
 
 	print "Begining Exploration"
 	subMap = rospy.Subscriber('/move_base/global_costmap/costmap',OccupancyGrid,saveMap,queue_size=3)
@@ -112,8 +164,15 @@ if __name__ == '__main__':
 				minDistance = tempDistance
 				minCentriod = centroid
 
-		print sendGoal(centroid) #sends goal and doesn't proceed until the robot is at the goal position
-		rospy.sleep(rospy.Duration(2))
+		print ("SEND GOAL: ", sendGoal(centroid)) #sends goal and doesn't proceed until the robot is at the goal position
+
+		rospy.sleep(rospy.Duration(1))
+		print "Rotation sent to goal"
+		rotate(3.14)
+		print "Rotation 1 complete"
+		rotate(3.14)
+		print "Rotation Complete"
+		rospy.sleep(rospy.Duration(1))
 		listOfFrontierCentroids = frontierFunctions.findFrontierRegionCentriods(mapOG,threshold)
 
 	print "Area has been fully explored"
