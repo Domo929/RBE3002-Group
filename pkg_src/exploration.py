@@ -1,24 +1,22 @@
 #!/usr/bin/env python
-
-
-'''Aren't currently broadcasting tf'''
-'''Goal needs to be PoseStamped when sent to actionServer'''
-'''Feedback provides server implementers a way to tell an ActionClient about the incremental progress of a goal. For moving the base, this might be the robot's current pose along the path.'''
-'''For move base, the result isn't very important, but it might contain the final pose of the robot'''
-
-
-
-
-import rospy, tf, numpy, math
-import actionlib
-from nav_msgs.msg import OccupancyGrid
+""" IMPORTS """
+import rospy, tf, numpy, math, actionlib 
+from nav_msgs.msg import OccupancyGrid, Odometry
 from move_base_msgs.msg import *
-from nav_msgs.msg import Odometry
 from findingFrontiers import FindFrontiers
 from geometry_msgs.msg import Twist, Point
 from tf.transformations import euler_from_quaternion
 
+
+
+"""
+Takes in an angle in radians and publishes Twist messages to rotate the robot to that angle
+
+	Params: angle; the angle that you wish to rotate to
+	Returns: None; rotates the robot to the given angle
+"""
 def rotate(angle):
+
     global pose
     Kp = 5
 
@@ -58,13 +56,18 @@ def rotate(angle):
         pose.pose.orientation.w)
         euler = tf.transformations.euler_from_quaternion(quaternion)
         yaw = euler[2] + 3.14
-        #print yaw
+
 
     stop = Twist()#all values default to 0 so this msg will stop the robot
     pub.publish(stop)
 
+"""
+Takes in an odometry message and sets global values to use in other methods
+	
+	Params: msg; the odometry message received from subscribing to the /odom topic
+	Returns: None; sets global values for the robots current pose
+"""
 def readOdom(msg):
-    """Read odometry messages and store into global variables."""
     global xPosition
     global yPosition
     global theta
@@ -73,23 +76,32 @@ def readOdom(msg):
     global pose
     try:
 	    pose = msg.pose
-	    # odom_tf.sendTransform((pose.pose.position.x, pose.pose.position.y, 0), 
-	    #         (pose.pose.orientation.x, pose.pose.orientation.y,pose.pose.orientation.z,pose.pose.orientation.w),rospy.Time.now(),"base_footprint","odom")
-	    (trans, rot) = odom_list.lookupTransform('map', 'base_footprint', rospy.Time(0))
-	    roll, pitch, yaw = euler_from_quaternion(rot)
+	    (trans, rot) = odom_list.lookupTransform('map', 'base_footprint', rospy.Time(0)) #Looks up the current robot pose transform
+	    roll, pitch, yaw = 
+	    euler_from_quaternion(rot)
 	    theta = yaw * (180.0/math.pi)
 	    xPosition = trans[0]
 	    yPosition = trans[1]
-
     except:
         print "drivingCode waiting for tf..."
-
+"""
+Takes in an OccupancyGrid and sets global values to use in other methods
+	
+	Params: msg; the OccupancyGrid message received from subscribing to the /move_base/global_costmap/costmap topic
+	Returns: None; sets global values for the current map
+"""
 def saveMap(msg):
 	global mapOG 
 	global hasMap
 
 	mapOG = msg
 	hasMap = True
+"""
+Takes in a centroid and navigates to it
+
+	Params: centroid; the centroid that the robot will navigate to
+	Returns: ac.get_state(); the state that the navigation request returns
+"""
 def sendGoal(centriod):
 	global ac
 	goal = MoveBaseGoal()
@@ -99,14 +111,15 @@ def sendGoal(centriod):
 	goal.target_pose.pose.position.x=centriod.x
 	goal.target_pose.pose.position.y=centriod.y
 	goal.target_pose.pose.orientation.w = 1.0
-
 	
 	ac.wait_for_server()
 	print goal
 	ac.send_goal(goal)
-	ac.wait_for_result() # this probably wont work. It is going to have to be switched to use
-	return ac.get_state() # feedback insead of result. 
-
+	ac.wait_for_result()
+	return ac.get_state()
+"""
+SLAM a previously unexplored environment
+"""
 if __name__ == '__main__':
 	global mapOG
 	global hasMap
@@ -124,19 +137,28 @@ if __name__ == '__main__':
 	hasMap= False
 	listOfFrontierCentriods = []
 	frontierFunctions = FindFrontiers()
-	ac = actionlib.SimpleActionClient('move_base',MoveBaseAction)
-	sub = rospy.Subscriber('/odom', Odometry, readOdom)
-	pub = rospy.Publisher('cmd_vel_mux/input/teleop', Twist, None, queue_size=10) # Publisher for commanding robot motion
-	odom_list = tf.TransformListener()
 
+	"""
+
+		Subscriber, action client, and publisher setup
+
+	"""
+	sub = rospy.Subscriber('/odom', Odometry, readOdom)
+	ac = actionlib.SimpleActionClient('move_base',MoveBaseAction)
+	pub = rospy.Publisher('cmd_vel_mux/input/teleop', Twist, None, queue_size=10)
+
+
+	odom_list = tf.TransformListener()
 	rospy.sleep(rospy.Duration(2))
 
 
-	print "Rotation sent to goal"
+	"""
+
+		Initial rotate, lets us see as much of the current environment as possible from our current location
+
+	"""
 	rotate(3.14)
-	print "Rotation 1 complete"
 	rotate(3.14)
-	print "Rotation Complete"
 
 
 	print "Begining Exploration"
@@ -144,19 +166,16 @@ if __name__ == '__main__':
 	ac.wait_for_server()
 	print "Service setup successful"
 
-	while(not(hasMap) and not(rospy.is_shutdown())): #wait to recieve inital map
+	while(not(hasMap) and not(rospy.is_shutdown())): #Wait to recieve inital map
 		rospy.sleep(rospy.Duration(1))
 		print "Waiting for map"
-
 	print "Map recieved"
-	listOfFrontierCentroids = frontierFunctions.findFrontierRegionCentriods(mapOG,threshold)
-	print "Centriods Found"
-	print ("length",len(listOfFrontierCentroids) )
-	#print listOfFrontierCentroids
 
-	while(len(listOfFrontierCentroids) > 0 and not(rospy.is_shutdown())): #while there is a frontier
-		#find closest frontier centriiods
-		#print ("length",len(listOfFrontierCentroids) )
+
+	listOfFrontierCentroids = frontierFunctions.findFrontierRegionCentriods(mapOG,threshold) #Find a list of frontier centroids
+
+	#While there is a frontier navigate to navigate to the last centroid
+	while(len(listOfFrontierCentroids) > 0 and not(rospy.is_shutdown())):
 		minDistance = -1
 		for centroid in listOfFrontierCentroids:
 			tempDistance = math.sqrt((centroid.x-xPosition)**2+(centroid.y-yPosition)**2)
@@ -167,11 +186,13 @@ if __name__ == '__main__':
 		print ("SEND GOAL: ", sendGoal(centroid)) #sends goal and doesn't proceed until the robot is at the goal position
 
 		rospy.sleep(rospy.Duration(1))
-		print "Rotation sent to goal"
+		"""
+
+			Rotate in place to explore more of the map
+
+		"""
 		rotate(3.14)
-		print "Rotation 1 complete"
 		rotate(3.14)
-		print "Rotation Complete"
 		rospy.sleep(rospy.Duration(1))
 		listOfFrontierCentroids = frontierFunctions.findFrontierRegionCentriods(mapOG,threshold)
 
